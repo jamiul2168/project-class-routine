@@ -2071,7 +2071,8 @@ function wkData(o){
   const[fD,tD]=wkRangeO(o),days=[];
   const n0=new Date(),nm0=n0.getHours()*60+n0.getMinutes();
   for(let d=new Date(fD);d<=tD;d.setDate(d.getDate()+1)){const i=d.getDay();
-    const hh=hol(d);
+    const hh=hol(d),xp=!hh&&R[i]&&d>=START?exIn(d):null;
+    if(xp){days.push({d:new Date(d),i,items:[],off:true,ex:true,skip:false,hol:null,sp:null,rng:"",why:xp.day.length?"পরীক্ষা: "+xp.day.map(x=>exName(x)+(exTime(x)?" ("+exTime(x)+")":"")).join(", "):"এই দিন পরীক্ষা নেই, তবে ক্লাসও নেই"});continue}
     if(!R[i]||hh||d<START){{const hd=!!hh&&!!R[i]&&d>=START,sp=hd?holSpan(hh):null;days.push({d:new Date(d),i,items:[],off:true,skip:!hd,hol:hd?hh:null,sp,rng:sp?sd(sp.f,sp.t)+(sp.n>1?" · "+bn(sp.n)+" দিন ছুটি":""):"",why:hh?(hh.r||"কলেজ বন্ধ"):(d<START?"ক্লাস এখনো শুরু হয়নি":"সাপ্তাহিক ছুটি")})}continue}
     setPer(d);const isT=d.getTime()===today.getTime();
     const items=R[i].map(([code,sh,room,a,z,bo],ix,arr)=>{const prac=isNaN(room),dc=code==="25811"?"28511":code;
@@ -2085,7 +2086,7 @@ function wkData(o){
   const sum=nOpen?"মোট "+bn(nOpen)+" দিন · মোট "+bn(nCls)+"টি ক্লাস":"এই সপ্তাহে সব দিন ছুটি";
   const items=[],seq=[];
   days.forEach(dy=>{const lab=DAYS[dy.i],sub=bn(dy.d.getDate())+" "+MON[dy.d.getMonth()];
-    if(dy.off){seq.push({k:"h",label:lab,sub,cnt:"ছুটি"},{k:"o",why:dy.why})}
+    if(dy.off){seq.push({k:"h",label:lab,sub,cnt:dy.ex?"পরীক্ষা":"ছুটি"},{k:"o",why:dy.why,ex:dy.ex})}
     else{seq.push({k:"h",label:lab,sub,cnt:bn(dy.items.length)+"টি ক্লাস"});dy.items.forEach(it=>{if(it.gp)seq.push({k:"g",g:it.gp});items.push(it);seq.push({k:"i",it})})}});
   const itemH=it=>crItemH(it,it.live);
   const holBox=g=>{const d0=g[0].d,sp=g[0].sp,one=sp.f===sp.t,past=d0<today,isT=d0.getTime()===today.getTime();
@@ -2095,7 +2096,7 @@ function wkData(o){
     if(dy.off&&dy.hol){const g=[dy];let m=k+1;while(m<days.length&&days[m].off&&days[m].hol&&days[m].sp.f===dy.sp.f&&days[m].sp.t===dy.sp.t){g.push(days[m]);m++}
       const lab=g.length>1?DAYS[g[0].i]+" – "+DAYS[g[g.length-1].i]:DAYS[dy.i],sub=g.length>1?bn(g[0].d.getDate())+" – "+bn(g[g.length-1].d.getDate())+" "+MON[g[g.length-1].d.getMonth()]:bn(dy.d.getDate())+" "+MON[dy.d.getMonth()];
       parts.push(`<div class="wkdg"><div class="wkdh"><b>${lab}</b><span>${sub} · ছুটি</span></div>${holBox(g)}</div>`);k=m;continue}
-    parts.push(`<div class="wkdg"><div class="wkdh"><b>${DAYS[dy.i]}</b><span>${bn(dy.d.getDate())} ${MON[dy.d.getMonth()]} · ${dy.off?"ছুটি":bn(dy.items.length)+"টি ক্লাস"}</span></div>`+(dy.off?`<div class="wkoff"><b>ছুটির দিন · কলেজ বন্ধ</b><small>${eh(dy.why)}</small></div>`:`<div class="tl">`+dy.items.map(it=>(it.gp?crGapH(it.gp):"")+itemH(it)).join("")+`</div>`)+`</div>`);k++}
+    parts.push(`<div class="wkdg"><div class="wkdh"><b>${DAYS[dy.i]}</b><span>${bn(dy.d.getDate())} ${MON[dy.d.getMonth()]} · ${dy.off?(dy.ex?"পরীক্ষা":"ছুটি"):bn(dy.items.length)+"টি ক্লাস"}</span></div>`+(dy.off?`<div class="wkoff"><b>${dy.ex?"পরীক্ষার সময় · কোনো ক্লাস নেই":"ছুটির দিন · কলেজ বন্ধ"}</b><small>${eh(dy.why)}</small></div>`:`<div class="tl">`+dy.items.map(it=>(it.gp?crGapH(it.gp):"")+itemH(it)).join("")+`</div>`)+`</div>`);k++}
   const ban=(o===0&&wkShift())?`<div class="wkoff" style="margin-bottom:10px"><b>🌴 সাপ্তাহিক ছুটি চলছে</b><small>এই সপ্তাহের ক্লাস শেষ। নিচে আগামী সপ্তাহের রুটিন দেওয়া হলো।</small></div>`:"";
   const html=ban+`<p class="count">${sum}</p>`+parts.join("");
   const title="সাপ্তাহিক ক্লাস রুটিন";
@@ -2145,7 +2146,8 @@ async function weekBuild(o){
   const[fD,tD]=wkRangeO(o);
   const days=[];
   for(let d=new Date(fD);d<=tD;d.setDate(d.getDate()+1)){const i=d.getDay();
-    const hh=hol(d);
+    const hh=hol(d),xp=!hh&&R[i]&&d>=START?exIn(d):null;
+    if(xp){days.push({d:new Date(d),i,items:[],off:true,ex:true,skip:false,hol:null,sp:null,rng:"",why:xp.day.length?"পরীক্ষা: "+xp.day.map(x=>exName(x)+(exTime(x)?" ("+exTime(x)+")":"")).join(", "):"এই দিন পরীক্ষা নেই, তবে ক্লাসও নেই"});continue}
     if(!R[i]||hh||d<START){{const hd=!!hh&&!!R[i]&&d>=START,sp=hd?holSpan(hh):null;days.push({d:new Date(d),i,items:[],off:true,skip:!hd,hol:hd?hh:null,sp,rng:sp?sd(sp.f,sp.t)+(sp.n>1?" · "+bn(sp.n)+" দিন ছুটি":""):"",why:hh?(hh.r||"কলেজ বন্ধ"):(d<START?"ক্লাস এখনো শুরু হয়নি":"সাপ্তাহিক ছুটি")})}continue}
     setPer(d);
     const items=R[i].map(([code,sh,room,a,z,bo],ix,arr)=>{const prac=isNaN(room),dc=code==="25811"?"28511":code;
@@ -2225,9 +2227,9 @@ async function weekBuild(o){
      if(dy.h>=200)await dr("cal","#6366f1",ox+LW/2-16,my-74,32);
      x.fillStyle="#0f172a";x.fillText(ft(DAYS[dy.i],LW-24,"800",32,19),ox+LW/2,my-10);
      x.fillStyle="#64748b";x.fillText(ft(fm(dy.d),LW-24,"600",22,14),ox+LW/2,my+22);
-     const ct=dy.off?"ছুটি":bn(dy.items.length)+"টি ক্লাস";x.font="700 19px "+F;const cwid=x.measureText(ct).width+34;
+     const ct=dy.off?(dy.ex?"পরীক্ষা":"ছুটি"):bn(dy.items.length)+"টি ক্লাস";x.font="700 19px "+F;const cwid=x.measureText(ct).width+34;
      rr(ox+LW/2-cwid/2,my+36,cwid,34,17,"#ffffff","#dfe3ff");x.fillStyle=dy.off?"#c2410c":"#4f46e5";x.fillText(ct,ox+LW/2,my+60);x.textAlign="left"}
-    if(dy.off){const bw=PER*cw+(PER-1)*G,my=y+dy.h/2;x.save();x.shadowColor="rgba(15,23,42,.06)";x.shadowBlur=18;x.shadowOffsetY=6;rr(cx0,y,bw,dy.h,28,"#fff7ed");x.restore();rr(cx0,y,bw,dy.h,28,null,"#fed7aa");x.textAlign="center";const t3=!!dy.rng;x.fillStyle="#c2410c";x.font="800 34px "+F;x.fillText("ছুটির দিন · কলেজ বন্ধ",cx0+bw/2,my-(t3?26:2));x.fillStyle="#9a3412";x.fillText(ft(dy.why,bw-80,"600",23,14),cx0+bw/2,my+(t3?14:38));if(t3){x.fillStyle="#b45309";x.fillText(ft(dy.rng,bw-80,"600",21,14),cx0+bw/2,my+52)}x.textAlign="left"}
+    if(dy.off){const bw=PER*cw+(PER-1)*G,my=y+dy.h/2;x.save();x.shadowColor="rgba(15,23,42,.06)";x.shadowBlur=18;x.shadowOffsetY=6;rr(cx0,y,bw,dy.h,28,"#fff7ed");x.restore();rr(cx0,y,bw,dy.h,28,null,"#fed7aa");x.textAlign="center";const t3=!!dy.rng;x.fillStyle="#c2410c";x.font="800 34px "+F;x.fillText(dy.ex?"পরীক্ষার সময় · কোনো ক্লাস নেই":"ছুটির দিন · কলেজ বন্ধ",cx0+bw/2,my-(t3?26:2));x.fillStyle="#9a3412";x.fillText(ft(dy.why,bw-80,"600",23,14),cx0+bw/2,my+(t3?14:38));if(t3){x.fillStyle="#b45309";x.fillText(ft(dy.rng,bw-80,"600",21,14),cx0+bw/2,my+52)}x.textAlign="left"}
     let yy=y;
     for(const row of dy.rows){
       const o=(row.nl-1)*32;
@@ -2262,7 +2264,7 @@ async function weekBuild(o){
   
   crBorder(x,W,H,S);const blob=await new Promise(r=>cv.toBlob(r,"image/png"));if(!blob){toast("সেভ করা যায়নি");return}
   const itemH=it=>crItemH(it,false);
-  const html=`<p class="count">মোট ${bn(nOpen)} দিন · মোট ${bn(nCls)}টি ক্লাস</p>`+days.map(dy=>`<div class="wkdg"><div class="wkdh"><b>${DAYS[dy.i]}</b><span>${bn(dy.d.getDate())} ${MON[dy.d.getMonth()]} · ${dy.off?"ছুটি":bn(dy.items.length)+"টি ক্লাস"}</span></div>`+(dy.off?`<div class="wkoff"><b>ছুটির দিন · কলেজ বন্ধ</b><small>${eh(dy.why)}</small></div>`:`<div class="tl">`+dy.items.map(it=>(it.gp?crGapH(it.gp):"")+itemH(it)).join("")+`</div>`)+`</div>`).join("");
+  const html=`<p class="count">মোট ${bn(nOpen)} দিন · মোট ${bn(nCls)}টি ক্লাস</p>`+days.map(dy=>`<div class="wkdg"><div class="wkdh"><b>${DAYS[dy.i]}</b><span>${bn(dy.d.getDate())} ${MON[dy.d.getMonth()]} · ${dy.off?(dy.ex?"পরীক্ষা":"ছুটি"):bn(dy.items.length)+"টি ক্লাস"}</span></div>`+(dy.off?`<div class="wkoff"><b>${dy.ex?"পরীক্ষার সময় · কোনো ক্লাস নেই":"ছুটির দিন · কলেজ বন্ধ"}</b><small>${eh(dy.why)}</small></div>`:`<div class="tl">`+dy.items.map(it=>(it.gp?crGapH(it.gp):"")+itemH(it)).join("")+`</div>`)+`</div>`).join("");
   return{blob,V,html,fn:"weekly-routine-"+GROUP+"-"+iso(oD)+"_to_"+iso(oE)+".png"};
 }
 async function wkSave(mode){
@@ -2389,7 +2391,7 @@ async function saveImg(mode,WV){const VV=WV||VIEW;
       if(sq.k==="o"){const y=Y0+pos[si];
         x.save();x.shadowColor="rgba(15,23,42,.06)";x.shadowBlur=18;x.shadowOffsetY=6;rr(cx,y,cw,110,28,"#fff7ed");x.restore();rr(cx,y,cw,110,28,null,"#fed7aa");
         await dr("smile","#c2410c",cx+30,y+34,42);
-        x.font="800 30px "+F;x.fillStyle="#c2410c";x.fillText("ছুটির দিন · কলেজ বন্ধ",cx+88,y+50);
+        x.font="800 30px "+F;x.fillStyle="#c2410c";x.fillText(sq.ex?"পরীক্ষার সময় · কোনো ক্লাস নেই":"ছুটির দিন · কলেজ বন্ধ",cx+88,y+50);
         x.fillStyle="#9a3412";x.fillText(ft(sq.why,cw-88-24,"600",22,14),cx+88,y+86);
         continue}
       if(sq.k==="g"){const y=Y0+pos[si];await crDrawGap(x,F,rr,dr,ft,cx,y,cw,96,sq.g);x.beginPath();x.arc(lx,y+48,9,0,7);x.fillStyle="#fff";x.fill();x.strokeStyle="#aeb6f3";x.lineWidth=3;x.stroke();continue}
@@ -2550,6 +2552,10 @@ const dfm=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);return bn(d)
 let EXAMS;__d(()=>{EXAMS=(window.__C&&window.__C.EX)||[]});
 let ETAB=false;
 const exList=()=>EXAMS.filter(x=>x&&x.d&&(!x.g||gM(x.g,GROUP))).slice().sort((a,b)=>(a.d+(a.s||"")).localeCompare(b.d+(b.s||"")));
+/* exam period: exams no more than 7 days apart form one period; during it there are no classes */
+function exIn(d){try{const L=exList();if(!L.length)return null;const k=iso(d),D=[...new Set(L.map(x=>x.d))].sort(),G=[];
+ for(const x of D){const g=G[G.length-1];if(g&&(exDt(x)-exDt(g.t))/864e5<=7)g.t=x;else G.push({f:x,t:x})}
+ const g=G.find(g=>k>=g.f&&k<=g.t);if(!g)return null;return{f:g.f,t:g.t,day:L.filter(x=>x.d===k),next:L.find(x=>x.d>k&&x.d<=g.t)||null,all:L.filter(x=>x.d>=g.f&&x.d<=g.t)}}catch(e){return null}}
 const exDt=k=>{const[y,m,d]=String(k).split("-").map(Number);return new Date(y,m-1,d)};
 const exWhen=k=>{const n=Math.round((exDt(k)-today)/864e5);return n<0?{t:"শেষ হয়েছে",c:"past"}:n===0?{t:"আজ",c:"now"}:n===1?{t:"আগামীকাল",c:"soon"}:{t:bn(n)+" দিন বাকি",c:n<=3?"soon":""}};
 const exTime=x=>{const a=mm(x.s),b=mm(x.e);if(isFinite(a)&&isFinite(b)&&b>a)return rng(a,b);if(isFinite(a)){const f=f12(a);return f.l+" "+f.t+" থেকে"}return""};
@@ -2568,24 +2574,26 @@ const exBanner=E=>{const w=exWhen(E[0].d),lab=w.c==="now"?"আজ পরীক�
 function exSync(){
  const L=exList(),has=L.length>0,tb=$("rtabs"),fr=$("fullrow"),sw=document.querySelector("#ov .swh");
  if(!tb)return;
- tb.hidden=!has;fr.hidden=!has;if(!has)ETAB=false;
- tb.querySelectorAll("button").forEach(b=>b.classList.toggle("on",(b.dataset.t==="e")===ETAB));
+ if(!has)ETAB=false;
+ tb.hidden=true;fr.hidden=!ETAB;
  if(sw)sw.style.display=ETAB?"none":"";
  if(ETAB){
   $("t").textContent="পরীক্ষার রুটিন";
   $("s").innerHTML=ico("cal")+" "+GROUP+" · "+fdt(L[0].d)+(L[L.length-1].d!==L[0].d?" – "+fdt(L[L.length-1].d):"");
   $("b").innerHTML=exHtml();$("sv").style.display=$("shd").style.display="";
- }else if(has){
-  const E=L.filter(x=>x.d===iso(cur()));
-  if(E.length){
-   const w=exWhen(E[0].d),past=w.c==="past";
-   $("t").textContent=w.c==="now"?"আজ পরীক্ষার দিন":past?"এই দিন পরীক্ষা ছিল":w.t==="আগামীকাল"?"আগামীকাল পরীক্ষার দিন":"পরীক্ষার দিন";
-   VIEW.items=[];VIEW.msg="পরীক্ষার দিন — কোনো ক্লাস নেই";
-   $("b").innerHTML=`<div class="exday"><div class="exdi">${ico("edit")}</div><h3>${past?"পরীক্ষা হয়েছিল":"পরীক্ষা আছে"}</h3><p>${past?"এই দিন পরীক্ষার কারণে কোনো ক্লাস ছিল না।":"এই দিন পরীক্ষার কারণে কোনো ক্লাস হবে না। ভালোভাবে প্রস্তুতি নিন!"}</p></div>`
-    +E.map(exCard).join("")+`<button type="button" class="exall" data-extab="1">${ico("cal")} পুরো পরীক্ষার রুটিন দেখুন</button>`;
-   $("sv").style.display=$("shd").style.display="none";
-  }
- }
+  return}
+ const dt=cur(),P=exIn(dt);
+ if(!P)return;
+ /* exam period: nothing from the class routine, only exams */
+ const E=P.day,w=exWhen(iso(dt)),past=w.c==="past",dd=Math.round((dt-today)/864e5);
+ VIEW.items=[];VIEW.msg="পরীক্ষা চলছে — কোনো ক্লাস নেই";
+ $("t").textContent=E.length?(dd===0?"আজ পরীক্ষার দিন":dd===1?"আগামীকাল পরীক্ষার দিন":past?"এই দিন পরীক্ষা ছিল":"পরীক্ষার দিন"):"পরীক্ষার সময়";
+ const head=E.length
+  ?`<div class="exday"><div class="exdi">${ico("edit")}</div><h3>${past?"পরীক্ষা হয়েছিল":"পরীক্ষা আছে"}</h3><p>${past?"পরীক্ষার সময় কোনো ক্লাস ছিল না।":"পরীক্ষার সময় কোনো ক্লাস হবে না। ভালোভাবে প্রস্তুতি নিন!"}</p></div>`
+  :`<div class="exday"><div class="exdi">${ico("book")}</div><h3>${dd===0?"আজ":"এই দিন"} পরীক্ষা নেই</h3><p>পরীক্ষা চলছে (${sd(P.f,P.t)}), তাই কোনো ক্লাস ${past?"ছিল না":"হবে না"}।${P.next?" পরের পরীক্ষার প্রস্তুতি নিন!":""}</p></div>`;
+ const nx=!E.length&&P.next?`<div class="exdh">পরের পরীক্ষা</div>`+exCard(P.next):"";
+ $("b").innerHTML=head+E.map(exCard).join("")+nx+`<button type="button" class="exall" data-extab="1">${ico("cal")} পুরো পরীক্ষার রুটিন দেখুন</button>`;
+ $("sv").style.display=$("shd").style.display="none";
 }
 $("rtabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;const t=b.dataset.t==="e";if(t===ETAB)return;ETAB=t;show();$("b").scrollTop=0};
 $("b").addEventListener("click",e=>{if(e.target.closest("[data-extab]")){ETAB=true;show();$("b").scrollTop=0}});
@@ -2890,7 +2898,7 @@ const pd=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
 const dBt=(a,b)=>Math.round((b-a)/864e5);
 const dcode=c=>c==="25811"?"28511":c;
 const exOn=d=>{try{const k=iso(d);return exList().filter(x=>x.d===k)}catch(e){return[]}};
-const isCls=d=>d>=START&&!hol(d)&&!exOn(d).length&&!!(R[d.getDay()]&&R[d.getDay()].length);
+const isCls=d=>d>=START&&!hol(d)&&!exIn(d)&&!!(R[d.getDay()]&&R[d.getDay()].length);
 function offDay(d){return d>=START&&(!!hol(d)||!(R[d.getDay()]&&R[d.getDay()].length))}
 function holSpan(H){let a=pd(H.f),b=pd(H.t);for(let i=0;i<60;i++){const p=new Date(a);p.setDate(p.getDate()-1);if(offDay(p))a=p;else break}
 for(let i=0;i<60;i++){const n=new Date(b);n.setDate(n.getDate()+1);if(offDay(n))b=n;else break}
@@ -2914,10 +2922,15 @@ function nowCard(){
   const d=isCls(START)?new Date(START):nextCls(START);cls="off";kick=ico("hour")+" ক্লাস এখনো শুরু হয়নি";title="ক্লাস শুরু: "+dl(START)+" "+bn(START.getFullYear());if(d){go=d;sub="ক্লাস শুরু হতে "+cdTo(d)+" বাকি";later(d)}
  }else if(H){
   cls="off";kick=ico("smile")+" আজ ছুটি";title=H.r||"কলেজ বন্ধ";const d=nextCls(t0);sub=d?"ক্লাস শুরু হতে "+cdTo(d)+" বাকি":(()=>{const S=holSpan(H);return S.f===S.t?"আজ একদিনের ছুটি":sd(S.f,S.t)+" পর্যন্ত বন্ধ"})();{const S=holSpan(H);if(S.f!==S.t)x.push(`${ico("cal")} ছুটি: ${sd(S.f,S.t)}`)}if(d){go=d;later(d)}
- }else if(exOn(t0).length){
-  const E=exOn(t0),e0=E[0];cls="nx";c=COL[e0.c]||"#db2777";kick=ico("edit")+" আজ পরীক্ষা · কোনো ক্লাস নেই";title=E.map(exName).join(", ");
-  sub=exTime(e0)||"সময় পরে জানানো হবে";if(e0.rm)meta=`<span>${ico("pin")} কক্ষ: ${eh(exRoom(e0))}</span>`;
-  const d=nextCls(t0);if(d)later(d);
+ }else if(exIn(t0)){
+  const P=exIn(t0),E=P.day,e0=E[0]||P.next;cls="nx";
+  if(e0){c=COL[e0.c]||"#db2777";if(!E.length)go=exDt(e0.d);
+   kick=ico("edit")+(E.length?" আজ পরীক্ষা · কোনো ক্লাস নেই":" পরীক্ষা চলছে · কোনো ক্লাস নেই");
+   title=(E.length?E:[e0]).map(exName).join(", ");
+   sub=E.length?(exTime(e0)||"সময় পরে জানানো হবে"):"পরের পরীক্ষা: "+dl(exDt(e0.d))+(exTime(e0)?" · "+exTime(e0):"");
+   if(e0.rm)meta=`<span>${ico("pin")} কক্ষ: ${eh(exRoom(e0))}</span>`}
+  else{cls="off";kick=ico("smile")+" পরীক্ষা শেষ";title="আজ আর কোনো পরীক্ষা নেই"}
+  x.push(`${ico("cal")} পরীক্ষা চলবে: ${sd(P.f,P.t)}`);
  }else if(!(R[t0.getDay()]&&R[t0.getDay()].length)){
   cls="off";kick=ico("smile")+" আজ ছুটি";title="সাপ্তাহিক ছুটি";const d=nextCls(t0);sub=d?"ক্লাস শুরু হতে "+cdTo(d)+" বাকি":DAYS[t0.getDay()]+", বিশ্রাম নিন!";if(d){go=d;later(d)}
  }else{
