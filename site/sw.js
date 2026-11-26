@@ -1,5 +1,5 @@
 // Class Routine – offline-capable service worker
-const VERSION = "cr-v23";
+const VERSION = "cr-v24";
 const SHELL = VERSION + "-shell";     // app files (page, icons, fonts)
 const RUNTIME = VERSION + "-runtime"; // notice files, routine images, etc.
 
@@ -8,7 +8,7 @@ const u = p => new URL(p, SCOPE).href;
 
 // Files saved for offline use. Page is listed twice because hosts differ
 // (/class-routine vs /class-routine.html); whichever works gets cached.
-const PAGE_URLS = [u("class-routine"), u("class-routine.html")];
+const PAGE_URLS = [u("./"), u("index.html")];
 const CORE = [
   "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
   "favicon.png", "logo.png", "watermark.png", "id-card.html", "id-preview-front.jpg", "id-preview-back.jpg", "IdSans_600.woff2", "IdName_700.woff",
