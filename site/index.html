@@ -1713,6 +1713,18 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
 .exall{width:100%;min-height:46px;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:14px;border:1.5px dashed #db2777;background:#fdf2f8;color:#be185d;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
 .exall .i{width:16px;height:16px}
 </style>
+<style id="examcard">
+/* exam card = same look as the class routine card; colours come from the subject */
+.item.exit:before{display:none}
+.item.exit.past{opacity:.6}
+.item.exit .time .cd{font-weight:600}
+.item.exit .tag.exwt.now:not(.live){background:#fee2e2!important;color:#dc2626!important;border-color:#fecaca!important}
+.item.exit .tag.exwt.soon:not(.live){background:#fef3c7!important;color:#b45309!important;border-color:#fde68a!important}
+.item.exit .tag.exwt.past:not(.live){background:#f1f5f9!important;color:#64748b!important;border-color:#e2e8f0!important}
+.item.exit .tag.exwt.now .bd1{background:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.2)!important}
+.item.exit .tag.exwt.soon .bd1{background:#b45309!important;box-shadow:0 0 0 3px rgba(180,83,9,.2)!important}
+.item.exit .tag.exwt.past .bd1{background:#64748b!important;box-shadow:0 0 0 3px rgba(100,116,139,.2)!important}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -2562,8 +2574,10 @@ const exTime=x=>{const a=mm(x.s),b=mm(x.e);if(isFinite(a)&&isFinite(b)&&b>a)retu
 const exName=x=>NM[x.c]||x.c||x.ti||"পরীক্ষা";
 const exRoom=x=>x.rm?(isNaN(x.rm)?x.rm:bn(x.rm)):"";
 const exDay=x=>{const d=exDt(x.d);return DAYS[d.getDay()]+", "+bn(d.getDate())+" "+MON[d.getMonth()]};
-const exCard=x=>{const c=COL[x.c]||"#6366f1",d=exDt(x.d),w=exWhen(x.d),t=exTime(x),rm=exRoom(x);
- return `<div class="exc${w.c==="past"?" past":""}" style="--cx:${fit(c)}"><div class="exd"><small>${SHORT[d.getDay()]}</small><b>${bn(d.getDate())}</b><small>${MON[d.getMonth()]}</small></div><div class="exi"><div class="ext"><b>${h2(exName(x))}</b>${x.ti&&x.c?`<span class="exg">${h2(x.ti)}</span>`:""}</div><div class="exm">${t?ico("clock")+" "+t:ico("cal")+" "+exDay(x)}</div>${rm?`<div class="exm">${ico("pin")} কক্ষ: ${h2(rm)}</div>`:""}${x.n?`<div class="exn">${h2(x.n)}</div>`:""}</div><span class="exw ${w.c}">${w.t}</span></div>`};
+const exCard=x=>{const dc=x.c==="25811"?"28511":x.c,c=COL[x.c]||COL[dc]||"#6366f1",c2=COL2[x.c]||COL2[dc]||"",w=exWhen(x.d),t=exTime(x),rm=exRoom(x),nm=NM[x.c]||NM[dc]||x.c||x.ti||"পরীক্ষা",sic=crSic(nm,false);
+ const st=`--c:${c};--ct:${ink(c)};--cx:${fit(c)}${c2?`;--c2:${c2};--cx2:${fit(c2)}`:""}`;
+ const art=(()=>{const q=((window.__C&&window.__C.ARTN)||{})[nm];return q?`<img class="crwm" alt="" loading="lazy" referrerpolicy="no-referrer" src="https://api.iconify.design/${q.replace(":","/")}.svg?color=${encodeURIComponent(fit(c))}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">`:""})();
+ return `<div class="item exit${w.c==="past"?" past":""}" style="${st}"><svg class="crwm" aria-hidden="true"><use href="#s-${sic}"/></svg>${art}<span class="sic">${ico(sic)}</span><div class="ihd"><div class="top"><span class="code">${h2(nm)}</span><span class="bdg"><span class="tag exwt ${w.c}"><i class="bd1"></i>${w.t}</span></span></div><div class="time">${ico("cal")} <span class="gt">${exDay(x)}</span>${x.c?`<span class="cd">· কোড ${bn(h2(dc))}</span>`:""}</div></div><div class="meta2">${t?`<span class="du">${ico("clock")} ${t}</span>`:""}${rm?`<span class="rm">${ico("pin")} কক্ষ: ${h2(rm)}</span>`:""}${x.ti&&x.c?`<span class="bd">${ico("cap")} ${h2(x.ti)}</span>`:""}${x.n?`<span class="bd">${ico("edit")} ${h2(x.n)}</span>`:""}</div></div>`};
 function exHtml(){const L=exList();
  if(!L.length)return `<div class="empty"><div class="big">${ico("edit")}</div><b>এখনো পরীক্ষার রুটিন নেই</b><p>পরীক্ষার তথ্য যোগ হলে এখানে দেখা যাবে।</p></div>`;
  const up=L.filter(x=>exWhen(x.d).c!=="past"),pa=L.filter(x=>exWhen(x.d).c==="past");
@@ -2605,8 +2619,8 @@ async function exBuild(){
  const F='"Redaction","ShurjoWeb",sans-serif',W=952,pad=44,HH=328,GAP=18,FT=133,cx=pad,cw=W-pad*2;
  const mx=document.createElement("canvas").getContext("2d");
  const wrap=(t,w,font,max)=>{mx.font=font;const o=[];let l="";for(const ch of String(t).split(" ")){const n=l?l+" "+ch:ch;if(mx.measureText(n).width>w&&l){o.push(l);l=ch}else l=n}o.push(l);if(o.length>max){o.length=max;let t2=o[max-1];while(t2.length>1&&mx.measureText(t2+"…").width>w)t2=t2.slice(0,-1);o[max-1]=t2+"…"}return o};
- const bw=128,x0=cx+16+bw+26,rw=cx+cw-26;
- L.forEach(x=>{x.nl=x.n?wrap(x.n,rw-x0,"600 22px "+F,2):[];x.h=160+(x.nl.length?x.nl.length*30+8:0)});
+ const exR=e=>(exTime(e)||e.rm?1:0)+(e.ti&&e.c?1:0);
+ L.forEach(e=>{e.nl=e.n?wrap(e.n,cw-28-24-34,"600 21px "+F,2):[];e.h=132+38*exR(e)+(e.nl.length?e.nl.length*28+8:0)});
  const Y0=HH+66,H=Y0+L.reduce((a,x)=>a+x.h+GAP,0)-GAP+44+FT;
  let S=2;if(W*H*S*S>QCAP)S=Math.max(1,Math.sqrt(QCAP/(W*H)));
  const cv=document.createElement("canvas");cv.width=Math.round(W*S);cv.height=Math.round(H*S);
@@ -2641,25 +2655,35 @@ async function exBuild(){
  x.fillStyle="#475569";x.font="700 26px "+F;x.fillText("মোট "+bn(L.length)+"টি পরীক্ষা"+(up&&up!==L.length?" · বাকি "+bn(up)+"টি":""),pad,HH+38);
  /* exam cards */
  let y=Y0;
+ const IC={},ic=(n,c)=>{const k=n+c;if(IC[k])return IC[k];const el=document.getElementById("i-"+n);return IC[k]=new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+((el&&el.getAttribute("viewBox"))||"0 0 24 24")+'" width="96" height="96" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(el?el.innerHTML.replace(/currentColor/g,c):"")+"</svg>")})};
+ const dr=async(n,c,a,b,s)=>{const im=await ic(n,c);if(im)x.drawImage(im,a,b,s,s)};
+ const al=(h,a)=>{const c=_rgb(h);return c?"rgba("+c[0]+","+c[1]+","+c[2]+","+a+")":h};
  for(const e of L){
-  const c=COL[e.c]||"#6366f1",c2=COL2[e.c]||"",d=exDt(e.d),w=exWhen(e.d),h=e.h,past=w.c==="past";
+  const dc=e.c==="25811"?"28511":e.c,c=COL[e.c]||COL[dc]||"#6366f1",c2=COL2[e.c]||COL2[dc]||"",nm=NM[e.c]||NM[dc]||exName(e),it={n:nm,c,c2,prac:false},cc=fit(c),mu="#64748b",w=exWhen(e.d),h=e.h,past=w.c==="past",tx=cx+28,iw=cw-28-24;
   x.save();if(past)x.globalAlpha=.6;
-  x.save();x.shadowColor="rgba(15,23,42,.08)";x.shadowBlur=22;x.shadowOffsetY=7;rr(cx,y,cw,h,30,"#ffffff");x.restore();rr(cx,y,cw,h,30,null,"#e8ecf5");
-  const bx=cx+16,by=y+16,bh=h-32,gb=x.createLinearGradient(bx,by,bx+bw,by+bh);gb.addColorStop(0,fit(c));gb.addColorStop(1,fit(c2||c));rr(bx,by,bw,bh,22,gb);
-  const mid=by+bh/2;x.textAlign="center";x.fillStyle="#fff";
-  x.font="700 21px "+F;x.fillText(DAYS[d.getDay()],bx+bw/2,mid-34);
-  x.font="800 58px "+F;x.fillText(bn(d.getDate()),bx+bw/2,mid+22);
-  x.font="700 23px "+F;x.fillText(MON[d.getMonth()],bx+bw/2,mid+54);
-  x.textAlign="left";
-  /* when badge */
-  x.font="700 20px "+F;const bt=w.t,bwid=x.measureText(bt).width+30,pal=w.c==="now"?["#fee2e2","#dc2626"]:w.c==="soon"?["#fef3c7","#b45309"]:w.c==="past"?["#f1f5f9","#64748b"]:["#eef0ff","#4f46e5"];
-  rr(rw-bwid,y+22,bwid,38,19,pal[0]);x.fillStyle=pal[1];x.fillText(bt,rw-bwid+15,y+48);
-  x.fillStyle="#0f172a";x.fillText(ft(exName(e),rw-x0-bwid-16,"800",32,20),x0,y+52);
-  let ly=y+92;
-  const sub=[e.ti&&e.c?e.ti:"",exTime(e)||exDay(e)].filter(Boolean).join(" · ");
-  x.fillStyle="#475569";x.fillText(ft(sub,rw-x0,"600",24,15),x0,ly);
-  if(e.rm){ly+=36;x.fillStyle="#64748b";x.fillText(ft("কক্ষ: "+exRoom(e),rw-x0,"600",23,15),x0,ly)}
-  if(e.nl.length){ly+=40;x.fillStyle="#64748b";x.font="600 22px "+F;e.nl.forEach((l,i)=>x.fillText(l,x0,ly+i*30))}
+  x.save();x.shadowColor="rgba(15,23,42,.09)";x.shadowBlur=22;x.shadowOffsetY=7;rr(cx,y,cw,h,28,"#ffffff");x.restore();rr(cx,y,cw,h,28,null,"#e9edf6");
+  x.save();x.beginPath();x.roundRect(cx,y,cw,h,28);x.clip();const ag=x.createLinearGradient(0,y,0,y+h);ag.addColorStop(0,c);ag.addColorStop(1,c2?c2:al(c,.55));x.fillStyle=ag;x.fillRect(cx,y,5,h);x.restore();
+  try{await crWm(x,it,cx,y,cw,h,28)}catch(err){}
+  x.beginPath();x.arc(cx+52,y+50,25,0,7);x.fillStyle=GLX(x,cx+27,y+25,cx+77,y+75,it,.16);x.fill();await dr(crSic(nm,false),cc,cx+52-14,y+50-14,28);
+  /* when badge (same shape as the type badge on class cards) */
+  const sp=w.c==="now"||w.c==="soon"||w.c==="past",pc=w.c==="now"?"#dc2626":w.c==="soon"?"#b45309":w.c==="past"?"#64748b":c,pd=sp?pc:(c2||c),pt=sp?pc:cc;
+  x.font="700 18px "+F;const bt=w.t,tw=x.measureText(bt).width+46,bx=cx+cw-tw-18,by=y+18;
+  rr(bx,by,tw,38,19,al(pc,.10),al(pc,.45));x.fillStyle=al(pc,.24);x.beginPath();x.arc(bx+21,by+19,8.5,0,7);x.fill();x.fillStyle=pd;x.beginPath();x.arc(bx+21,by+19,5,0,7);x.fill();
+  x.fillStyle=pt;x.fillText(bt,bx+37,by+26);
+  /* subject name (gradient when the subject has a second colour) */
+  {const t1=ft(nm,bx-14-(cx+88),"800",26,15);x.fillStyle=GF(x,cx+88,x.measureText(t1).width/GSPAN,it,"#0f172a");x.fillText(t1,cx+88,y+46)}
+  /* date + code */
+  const T0=y+86;
+  await dr("cal",cc,tx,T0,26);
+  {const dt=ft(exDay(e),iw-36-(e.c?170:0),"700",25,14);x.fillStyle=GF(x,tx+36,x.measureText(dt).width/GSPAN,it,cc);x.fillText(dt,tx+36,T0+22);
+   if(e.c){const tw2=x.measureText(dt).width,cs="· কোড "+bn(dc);x.font="600 18px "+F;if(36+tw2+12+x.measureText(cs).width<=iw){x.fillStyle=mu;x.fillText(cs,tx+36+tw2+12,T0+22)}}}
+  let ry=y+128;const c2x=tx+Math.floor(iw*.46),tW=c2x-tx-34-8,tW2=tx+iw-c2x-34,tm=exTime(e),rm=exRoom(e);
+  if(tm||rm){
+   if(tm){await dr("clock",mu,tx,ry,24);x.fillStyle="#334155";x.fillText(ft(tm,rm?tW:iw-34,"600",20,13),tx+34,ry+21)}
+   if(rm){const rx=tm?c2x:tx,rw2=tm?tW2:iw-34;await dr("pin",cc,rx,ry,24);x.fillStyle=cc;x.fillText(ft("কক্ষ: "+rm,rw2,"700",20,13),rx+34,ry+21)}
+   ry+=38}
+  if(e.ti&&e.c){await dr("cap",mu,tx,ry,24);x.fillStyle="#334155";x.fillText(ft(e.ti,iw-34,"500",20,13),tx+34,ry+21);ry+=38}
+  if(e.nl.length){x.fillStyle="#64748b";x.font="600 21px "+F;e.nl.forEach((l,i)=>x.fillText(l,tx,ry+14+i*28))}
   x.restore();y+=h+GAP}
  {const SY=H-FT;
   if(SITE){x.font="700 24px "+F;const tw=x.measureText(SITE).width,pw=tw+60,px=(W-pw)/2;rr(px,SY,pw,58,29,"#eceeff");x.fillStyle="#4338ca";x.textAlign="center";x.fillText(SITE,W/2,SY+38)}
