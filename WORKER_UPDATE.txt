@@ -1,0 +1,19 @@
+WORKER UPDATE (deploy this BEFORE using the new Exam routine in the admin panel)
+=================================================================================
+Open your Cloudflare Worker code and make these 2 small edits.
+
+EDIT 1 - allow the new "exams" section
+  Find:     const SEC=["settings","subjects","teachers","groups","links","routine","notices","holidays","students","homework","timings","files"],PIN=/^\d{4}$/;
+  Replace:  const SEC=["settings","subjects","teachers","groups","links","routine","notices","holidays","students","homework","timings","files","exams"],PIN=/^\d{4}$/;
+
+EDIT 2 - validate exam rows (optional but recommended)
+  Find this line (inside  if(p==="/api/save"){ ... } ):
+     const d=JSON.stringify(b.data);if(d.length>9e5)return J({error:"Too much data in one section"},413);
+  Put this block just BEFORE it:
+
+   if(b.section==="exams"){const T=v=>/^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v||"").trim());
+    const bad=b.data.find(r=>!r||typeof r!=="object"||!/^\d{4}-\d{2}-\d{2}$/.test(String(r.date||""))||(r.start&&!T(r.start))||(r.end&&!T(r.end)));
+    if(bad)return J({error:"Each exam needs a valid date (YYYY-MM-DD) and valid times like 10:00."},400);
+    b.data=b.data.map(r=>({g:String(r.g||"").slice(0,4),title:String(r.title||"").trim().slice(0,60),code:String(r.code||"").slice(0,20),date:r.date,start:String(r.start||"").trim(),end:String(r.end||"").trim(),room:String(r.room||"").trim().slice(0,40),note:String(r.note||"").trim().slice(0,300)}))}
+
+No database migration is needed: the "exams" section is created automatically the first time you publish it.
