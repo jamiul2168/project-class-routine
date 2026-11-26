@@ -1,5 +1,5 @@
 // Class Routine – offline-capable service worker
-const VERSION = "cr-v30";
+const VERSION = "cr-v32";
 const SHELL = VERSION + "-shell";     // app files (page, icons, fonts)
 const RUNTIME = VERSION + "-runtime"; // notice files, routine images, etc.
 
@@ -7,7 +7,7 @@ const SCOPE = self.registration.scope;
 const u = p => new URL(p, SCOPE).href;
 
 // Files saved for offline use. Page is listed twice because hosts differ
-// (/class-routine vs /class-routine.html); whichever works gets cached.
+// (/ vs /index.html); whichever works gets cached.
 const PAGE_URLS = [u("./"), u("index.html")];
 const CORE = [
   "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
@@ -84,7 +84,7 @@ self.addEventListener("fetch", e => {
     e.respondWith((async () => {
       const cache = await caches.open(SHELL);
       let hit = await cache.match(req, { ignoreSearch: true });
-      if (!hit && (url.pathname === "/" || /class-routine/.test(url.pathname))) {
+      if (!hit && (url.pathname === "/")) {
         hit = await cache.match(PAGE_URLS[0]) || await cache.match(PAGE_URLS[1]);
       }
       const net = fetch(req).then(async r => {

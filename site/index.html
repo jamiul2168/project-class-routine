@@ -1703,6 +1703,15 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
 .exbi .i{width:20px;height:20px}
 .exbt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.exbt b{font-size:14.5px}.exbt small{font-size:12.5px;line-height:1.45;color:#a16207}
 .exbg{flex:none;display:flex;align-items:center;gap:2px;font-size:12.5px;font-weight:700}.exbg .i{width:14px;height:14px}
+.act.ex{--t1:#db2777}
+/* exam day: no class routine, only the exams of that day */
+.exday{text-align:center;padding:18px 14px 16px;margin:0 0 14px;border-radius:22px;border:1.5px solid #fbcfe8;background:linear-gradient(160deg,#fdf2f8,#fff 70%)}
+.exday .exdi{width:54px;height:54px;margin:0 auto 10px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#ec4899,#db2777);box-shadow:0 10px 22px -8px rgba(219,39,119,.6)}
+.exday .exdi .i{width:26px;height:26px}
+.exday h3{margin:0 0 4px;font-size:19px;font-weight:800;color:var(--text)}
+.exday p{margin:0;font-size:13px;line-height:1.55;color:var(--muted)}
+.exall{width:100%;min-height:46px;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:14px;border:1.5px dashed #db2777;background:#fdf2f8;color:#be185d;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer}
+.exall .i{width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -1784,10 +1793,10 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
     <button class="act nt" id="nto" type="button"><span class="ai"><svg class="i"><use href="#i-bell"/></svg></span><span class="at2">Notices</span><small id="ncnt"></small></button>
     <button class="act st" id="sto" type="button"><span class="ai"><svg class="i"><use href="#i-users"/></svg></span><span class="at2">Student List</span><small>Names &amp; roll</small></button>
     <button class="act fb" id="fbo" type="button"><span class="ai"><svg class="i"><use href="#i-edit"/></svg></span><span class="at2">Feedback</span><small>আপনার মতামত দিন</small></button>
+    <button class="act ex" id="exo" type="button"><span class="ai"><svg class="i"><use href="#i-edit"/></svg></span><span class="at2">Exam Routine</span><small id="exc">পরীক্ষার রুটিন</small></button>
   </div></section>
   <section class="cats soonsec"><h3 class="ch"><span class="chi"><svg class="i"><use href="#i-clock"/></svg></span> Coming soon</h3>
   <div class="acts">
-    <button class="act soon" type="button"><span class="ai"><svg class="i"><use href="#i-edit"/></svg></span><span class="at2">Exam Routine</span><small>Coming soon</small></button>
     <button class="act soon" type="button"><span class="ai"><svg class="i"><use href="#i-book"/></svg></span><span class="at2">Syllabus</span><small>Coming soon</small></button>
     <button class="act soon" type="button"><span class="ai"><svg class="i"><use href="#i-award"/></svg></span><span class="at2">Results</span><small>Coming soon</small></button>
   </div></section>
@@ -2568,7 +2577,14 @@ function exSync(){
   $("b").innerHTML=exHtml();$("sv").style.display=$("shd").style.display="";
  }else if(has){
   const E=L.filter(x=>x.d===iso(cur()));
-  if(E.length)$("b").insertAdjacentHTML("afterbegin",exBanner(E));
+  if(E.length){
+   const w=exWhen(E[0].d),past=w.c==="past";
+   $("t").textContent=w.c==="now"?"আজ পরীক্ষার দিন":past?"এই দিন পরীক্ষা ছিল":w.t==="আগামীকাল"?"আগামীকাল পরীক্ষার দিন":"পরীক্ষার দিন";
+   VIEW.items=[];VIEW.msg="পরীক্ষার দিন — কোনো ক্লাস নেই";
+   $("b").innerHTML=`<div class="exday"><div class="exdi">${ico("edit")}</div><h3>${past?"পরীক্ষা হয়েছিল":"পরীক্ষা আছে"}</h3><p>${past?"এই দিন পরীক্ষার কারণে কোনো ক্লাস ছিল না।":"এই দিন পরীক্ষার কারণে কোনো ক্লাস হবে না। ভালোভাবে প্রস্তুতি নিন!"}</p></div>`
+    +E.map(exCard).join("")+`<button type="button" class="exall" data-extab="1">${ico("cal")} পুরো পরীক্ষার রুটিন দেখুন</button>`;
+   $("sv").style.display=$("shd").style.display="none";
+  }
  }
 }
 $("rtabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;const t=b.dataset.t==="e";if(t===ETAB)return;ETAB=t;show();$("b").scrollTop=0};
@@ -2673,6 +2689,9 @@ async function exFull(){
  try{const eb=await exBuild();if(!eb)return;pg.push(await jp(eb.blob))}catch(e){toast("ডাউনলোড করা যায়নি");return}
  await exDown(exPdf(pg),"Full-Routine-"+GROUP+".pdf","পুরো রুটিন ডাউনলোড হয়েছে")}
 $("fulb").onclick=e=>crLoad(e.currentTarget,exFull());
+{const ec=()=>{const e=$("exc");if(!e)return;const L=exList(),up=L.filter(x=>exWhen(x.d).c!=="past");e.textContent=!L.length?"এখনো দেওয়া হয়নি":up.length?"বাকি "+bn(up.length)+"টি পরীক্ষা":"সব পরীক্ষা শেষ"};
+ __d(()=>{try{ec()}catch(e){}});document.querySelectorAll(".g").forEach(b=>b.addEventListener("click",()=>{try{ec()}catch(e){}}));
+ $("exo").onclick=()=>{let n=0;try{n=exList().length}catch(e){}if(!n){toast("এই গ্রুপের পরীক্ষার রুটিন এখনো দেওয়া হয়নি");return}ETAB=true;$("d").value=iso(autoDate());show()}}
 
 {const sk="cr_hit",KV="cr_views",fmtV=n=>n<1e3?String(n):n<1e6?(Math.floor(n/100)/10).toString().replace(/\.0$/,"")+"k":(Math.floor(n/1e5)/10).toString().replace(/\.0$/,"")+"M",showV=t=>{const e=$("vw");if(!e||typeof t!=="number")return;e.innerHTML=ico("eye")+" "+fmtV(t)+(t===1?" view":" views");e.title=t.toLocaleString("en-US")+(t===1?" view":" views");e.style.display=""};
  // প্রতি ডিভাইসে দিনে একবার গোনা হবে (বাংলাদেশ সময়, UTC+6)
@@ -2870,7 +2889,8 @@ $("nto").onclick=openNt;$("ntx2").onclick=closeNt;$("ntc2").onclick=closeNt;$("n
 const pd=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
 const dBt=(a,b)=>Math.round((b-a)/864e5);
 const dcode=c=>c==="25811"?"28511":c;
-const isCls=d=>d>=START&&!hol(d)&&!!(R[d.getDay()]&&R[d.getDay()].length);
+const exOn=d=>{try{const k=iso(d);return exList().filter(x=>x.d===k)}catch(e){return[]}};
+const isCls=d=>d>=START&&!hol(d)&&!exOn(d).length&&!!(R[d.getDay()]&&R[d.getDay()].length);
 function offDay(d){return d>=START&&(!!hol(d)||!(R[d.getDay()]&&R[d.getDay()].length))}
 function holSpan(H){let a=pd(H.f),b=pd(H.t);for(let i=0;i<60;i++){const p=new Date(a);p.setDate(p.getDate()-1);if(offDay(p))a=p;else break}
 for(let i=0;i<60;i++){const n=new Date(b);n.setDate(n.getDate()+1);if(offDay(n))b=n;else break}
@@ -2894,6 +2914,10 @@ function nowCard(){
   const d=isCls(START)?new Date(START):nextCls(START);cls="off";kick=ico("hour")+" ক্লাস এখনো শুরু হয়নি";title="ক্লাস শুরু: "+dl(START)+" "+bn(START.getFullYear());if(d){go=d;sub="ক্লাস শুরু হতে "+cdTo(d)+" বাকি";later(d)}
  }else if(H){
   cls="off";kick=ico("smile")+" আজ ছুটি";title=H.r||"কলেজ বন্ধ";const d=nextCls(t0);sub=d?"ক্লাস শুরু হতে "+cdTo(d)+" বাকি":(()=>{const S=holSpan(H);return S.f===S.t?"আজ একদিনের ছুটি":sd(S.f,S.t)+" পর্যন্ত বন্ধ"})();{const S=holSpan(H);if(S.f!==S.t)x.push(`${ico("cal")} ছুটি: ${sd(S.f,S.t)}`)}if(d){go=d;later(d)}
+ }else if(exOn(t0).length){
+  const E=exOn(t0),e0=E[0];cls="nx";c=COL[e0.c]||"#db2777";kick=ico("edit")+" আজ পরীক্ষা · কোনো ক্লাস নেই";title=E.map(exName).join(", ");
+  sub=exTime(e0)||"সময় পরে জানানো হবে";if(e0.rm)meta=`<span>${ico("pin")} কক্ষ: ${eh(exRoom(e0))}</span>`;
+  const d=nextCls(t0);if(d)later(d);
  }else if(!(R[t0.getDay()]&&R[t0.getDay()].length)){
   cls="off";kick=ico("smile")+" আজ ছুটি";title="সাপ্তাহিক ছুটি";const d=nextCls(t0);sub=d?"ক্লাস শুরু হতে "+cdTo(d)+" বাকি":DAYS[t0.getDay()]+", বিশ্রাম নিন!";if(d){go=d;later(d)}
  }else{
