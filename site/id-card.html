@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' https://api.class-routine.jhbd.dev.cv https://class-routine-backend.jhbd.workers.dev; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student ID Card Maker</title>
+<meta name="theme-color" content="#f4f5fc">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+@font-face{font-family:"IdSans";font-weight:600;font-display:swap;src:url("IdSans_600.woff2") format("woff2")}
+@font-face{font-family:"IdName";font-weight:700;font-display:swap;src:url("IdName_700.woff") format("woff")}
+@font-face{font-family:"Redaction";font-style:normal;font-weight:400;font-display:swap;src:url("Redaction_400.woff2") format("woff2");unicode-range:U+0020-007E,U+00A0-00FF,U+2013-2014,U+2018-201E,U+2020-2022,U+2026,U+2039-203A,U+20AC,U+2122,U+2212}
+@font-face{font-family:"Redaction";font-style:normal;font-weight:700;font-display:swap;src:url("Redaction_700.woff2") format("woff2");unicode-range:U+0020-007E,U+00A0-00FF,U+2013-2014,U+2018-201E,U+2020-2022,U+2026,U+2039-203A,U+20AC,U+2122,U+2212}
+@font-face{font-family:"ShurjoWeb";font-style:normal;font-weight:400;font-display:swap;src:url("ShurjoWeb_400.woff2") format("woff2")}
+@font-face{font-family:"ShurjoWeb";font-style:normal;font-weight:700;font-display:swap;src:url("ShurjoWeb_700.woff2") format("woff2")}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5fc;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e5e9f2;--accent:#4f46e5;--accent2:#06b6d4;--soft:#eef0ff;
+--shadow:0 10px 40px rgba(30,41,90,.12);--ease:cubic-bezier(.2,.8,.2,1);--r:16px;
+--sh1:0 1px 2px rgba(30,41,90,.05),0 2px 6px rgba(30,41,90,.03);--sh2:0 8px 24px rgba(15,23,42,.08);
+--chipb:color-mix(in srgb,var(--accent) 22%,transparent)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:"Redaction","ShurjoWeb",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+/* watermark (institute logo), same as the class routine page */
+body::before{content:"";position:fixed;inset:0;z-index:11;pointer-events:none;background:url(watermark.png) center center/min(72vw,380px) auto no-repeat;opacity:.055}
+button,input{font-family:inherit}
+.wrap{max-width:460px;margin:0 auto;padding:16px 16px 40px;position:relative;z-index:1}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes crspin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.i{width:1.1em;height:1.1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.17em;flex:none}
+
+/* header card */
+.hd{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--sh1);position:relative;overflow:hidden;animation:rise .45s var(--ease) backwards}
+.hd:before{content:"";position:absolute;right:-46px;top:-56px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%);pointer-events:none}
+.hd-top{display:flex;align-items:center;gap:11px;position:relative}
+.ic.lg{width:44px;height:44px;border-radius:13px;overflow:hidden;background:#fff;border:1px solid var(--line);box-shadow:var(--sh1);flex:none}
+.ic.lg img{display:block;width:100%;height:100%;object-fit:cover}
+.hd-t{flex:1;min-width:0;line-height:1.25}
+.hd-t small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hd-t span{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accent);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none;flex:none;transition:transform .15s,filter .2s}
+.bk .i{width:20px;height:20px}
+.bk:hover{filter:brightness(.97)}.bk:active{transform:scale(.95)}
+.hd h1{margin:16px 0 2px;font-size:25px;line-height:1.25;position:relative}
+.hd p{margin:0;font-size:13px;color:var(--muted);position:relative}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;position:relative}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 16%,transparent);font-weight:600;font-size:12px;padding:4px 11px;border-radius:99px}
+.chip .i{width:13px;height:13px}
+
+/* panels */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--sh1);margin-top:12px;animation:rise .45s var(--ease) backwards}
+.panel:nth-of-type(1){animation-delay:.08s}.panel:nth-of-type(2){animation-delay:.14s}
+.panel h3{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:14.5px;font-weight:700}
+.panel h3 .i{width:32px;height:32px;padding:8px;border-radius:10px;background:var(--soft);color:var(--accent)}
+.panel h3 small{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:2px 9px;border-radius:99px}
+
+/* photo picker */
+.pick{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent);background:var(--soft);border-radius:16px;cursor:pointer;color:var(--accent);transition:border-color .2s,background .2s}
+.pick:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--card))}
+.pick input{display:none}
+.pick .pi{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--card);border:1px solid var(--chipb);overflow:hidden;flex:none}
+.pick .pi .i{width:21px;height:21px}
+.pick .pi img{width:100%;height:100%;object-fit:cover;display:none}
+.pick.has .pi .i{display:none}.pick.has .pi img{display:block}
+.pick .pt{flex:1;min-width:0;line-height:1.3}
+.pick .pt b{display:block;font-size:14.5px}
+.pick .pt small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.pick>.i{width:18px;height:18px}
+.zoom{display:none;align-items:center;gap:10px;margin-top:12px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:14px}
+.zoom.show{display:flex}
+.zoom .i{width:18px;height:18px;color:var(--accent)}
+.zoom input{flex:1;min-width:0;accent-color:var(--accent)}
+.hint{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:10px 2px 0;line-height:1.5}
+.hint .i{width:16px;height:16px;margin-top:2px;color:var(--accent)}
+.err{display:none;color:#dc2626;font-size:13px;margin:8px 2px 0}
+
+/* fields */
+.fl{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 0 5px 2px}
+.fl:first-of-type{margin-top:0}
+.fld{position:relative}
+.fld>.i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);width:18px;height:18px;pointer-events:none;transition:color .2s}
+.fld:focus-within>.i{color:var(--accent)}
+.fld input{width:100%;min-height:50px;padding:13px 14px 13px 42px;font-size:16px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);box-shadow:var(--sh1);transition:border-color .2s,box-shadow .2s}
+.fld input::placeholder{color:#a3adc2;opacity:1}
+.fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--soft)}
+.fld.bad input{border-color:#dc2626;box-shadow:0 0 0 4px rgba(220,38,38,.10)}
+.pick.bad{border-color:#dc2626;box-shadow:0 0 0 4px rgba(220,38,38,.10)}
+
+/* preview */
+.stage{margin-top:14px;display:flex;justify-content:center;animation:rise .45s var(--ease) .2s backwards}
+#cv{width:100%;max-width:340px;height:auto;aspect-ratio:1024/1536;border-radius:22px;box-shadow:0 18px 50px rgba(30,41,90,.28);touch-action:auto;cursor:grab;background:#fff;border:1px solid var(--line)}
+#cv.drag{cursor:grabbing}
+#cb{width:100%;max-width:340px;height:auto;aspect-ratio:1024/1536;border-radius:22px;box-shadow:0 18px 50px rgba(30,41,90,.28);background:#fff;border:1px solid var(--line);display:block}
+.stage{margin-top:14px;flex-direction:column;align-items:center;gap:18px}
+
+/* buttons (same as the site's Download / Save buttons) */
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.go{flex-basis:calc(50% - 5px)!important;position:relative;display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-height:48px;padding:10px;border:1px solid var(--chipb);border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;overflow:hidden;background:var(--soft);color:var(--accent);box-shadow:none;transition:transform .15s,filter .2s}
+.go .i{width:18px;height:18px}
+.go:hover{filter:brightness(1.05)}
+.go:active{transform:scale(.96)}
+.go.ld{pointer-events:none;color:transparent!important;cursor:progress}
+.go.ld>*{opacity:0!important}
+.go.ld::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:2.5px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);border-radius:50%;animation:crspin .7s linear infinite}
+
+.go.clr{color:#dc2626;background:#fef2f2;border-color:rgba(220,38,38,.25)}
+.go.clr.ld::after{border-color:rgba(220,38,38,.3);border-top-color:#dc2626}
+.dev{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;margin:14px 0 8px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:18px;font-size:13px;color:var(--muted);text-align:center;box-shadow:var(--sh1)}
+.dev .dv-t{white-space:nowrap}
+.dev a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;background:#1877f2;color:#fff;text-decoration:none;font-weight:600;font-size:13.5px;box-shadow:0 4px 12px rgba(24,119,242,.28);flex:none}
+.dev a svg{width:16px;height:16px;fill:#fff;flex:none}
+.dvb{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--soft);color:var(--muted);font:inherit;font-size:13px;padding:4px 10px 4px 5px;border-radius:99px;cursor:pointer;transition:border-color .2s,transform .15s}
+.dvb:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}.dvb:active{transform:scale(.97)}
+.dvb b{color:var(--text)}
+.dvav{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none;background:var(--card)}
+.dvch{width:14px;height:14px;color:var(--accent)}
+body.lock{overflow:hidden}
+.dvmd{width:100%;max-width:440px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden}
+.dvhd{display:flex;align-items:center;gap:10px;padding:14px 14px 12px 18px;border-bottom:1px solid var(--line)}
+.dvhd div{flex:1;min-width:0;line-height:1.3}
+.dvhd h4{margin:0;font-size:17px}
+.dvhd small{display:block;font-size:12px;color:var(--muted)}
+.dvx{width:40px;height:40px;border-radius:13px;border:1px solid var(--line);background:var(--soft);color:var(--accent);display:grid;place-items:center;cursor:pointer;flex:none}
+.dvx .i{width:18px;height:18px}
+.dvbody{padding:14px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.dvft{padding:10px 14px 14px;border-top:1px solid var(--line)}
+.dvft .go{width:100%}
+.dvh{text-align:center;padding:4px 0 2px}
+.dvph{width:116px;height:116px;margin:2px auto 12px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 28px -10px color-mix(in srgb,var(--accent) 60%,transparent)}
+.dvph img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid var(--card);background:var(--soft)}
+.dvph .dvfb{display:none;width:100%;height:100%;border-radius:50%;border:3px solid var(--card);background:var(--soft);color:var(--accent);font-size:34px;font-weight:700;align-items:center;justify-content:center}
+.dvnm{font-size:21px;font-weight:700;line-height:1.25;margin:0}
+.dvsb{color:var(--muted);font-size:13px;margin:3px 0 0}
+.dvloc,.dvrl{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 4px}
+.dvloc span,.dvrl span{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--accent);background:var(--soft);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);padding:4px 11px;border-radius:99px}
+.dvrl span{color:var(--text);background:var(--bg);border-color:var(--line);font-weight:500}
+.dvbx{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:13px 14px;margin-top:12px}
+.dvbx h5{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:14px;font-weight:700}
+.dvbx h5 em{font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--soft);font-size:14px}
+.dvbx p{margin:0;font-size:13.5px;line-height:1.65}
+.dvbx ul{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.dvbx li{display:flex;gap:8px;font-size:13px;line-height:1.5;color:var(--muted)}
+.dvbx li:before{content:"✓";color:#16a34a;font-weight:700;flex:none}
+.dvq{margin-top:12px;text-align:center;font-size:13.5px;font-weight:600;color:var(--accent);padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 8%,var(--card));border:1px dashed color-mix(in srgb,var(--accent) 35%,transparent)}
+.dvfbk{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;min-height:46px;border-radius:14px;background:#1877f2;color:#fff!important;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 8px 18px -8px rgba(24,119,242,.6)}
+.dvfbk svg{width:17px;height:17px;fill:#fff}
+.mk{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.mk.show{display:flex;animation:pop .18s var(--ease)}
+.md{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 18px 16px;box-shadow:0 24px 60px rgba(15,23,42,.35);text-align:center}
+.md .mi{width:52px;height:52px;margin:0 auto 12px;border-radius:16px;display:grid;place-items:center;background:#fef2f2;color:#dc2626}
+.md .mi .i{width:26px;height:26px}
+.md h4{margin:0 0 6px;font-size:18px}
+.md p{margin:0 0 18px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.md .row{margin-top:0}
+.go.sol{background:#dc2626;border-color:#dc2626;color:#fff}
+.note{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--muted);font-size:12px;margin:18px 0 4px}
+.note .i{width:14px;height:14px;color:#16a34a}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;width:max-content;max-width:min(92vw,440px);
+display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:16px;text-align:left;
+font:600 14px/1.45 "ShurjoWeb","Redaction",system-ui,sans-serif;letter-spacing:.1px;
+background:color-mix(in srgb,var(--card) 92%,transparent);color:var(--text);border:1px solid var(--line);
+-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);
+box-shadow:0 14px 34px -10px rgba(15,23,42,.30),0 2px 6px rgba(15,23,42,.08);
+opacity:0;transform:translate(-50%,-18px) scale(.96);pointer-events:none;z-index:100000;
+transition:opacity .22s ease,transform .32s cubic-bezier(.2,.9,.3,1.15)}
+.toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.toast::before{content:"";flex:none;width:28px;height:28px;border-radius:50%;
+background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/15px no-repeat}
+.toast.bad{border-color:color-mix(in srgb,#ef4444 45%,var(--line))}
+.toast.bad::before{background:color-mix(in srgb,#ef4444 16%,transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 7v6.5M12 17.2v.1'/%3E%3C/svg%3E") center/15px no-repeat}
+@media (prefers-reduced-motion:reduce){.toast{transition:opacity .15s}}
+/* loading overlay */
+.lo{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.lo.show{display:flex;animation:pop .18s var(--ease)}
+.lob{width:100%;max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:26px 20px 22px;text-align:center;box-shadow:0 24px 60px rgba(15,23,42,.35)}
+.lsp{position:relative;width:64px;height:64px;margin:0 auto 16px}
+.lsp::before,.lsp::after{content:"";position:absolute;inset:0;border-radius:50%}
+.lsp::before{border:4px solid color-mix(in srgb,var(--accent) 18%,transparent)}
+.lsp::after{border:4px solid transparent;border-top-color:var(--accent);border-right-color:var(--accent2);animation:crspin .8s linear infinite}
+.lsp .i{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;color:var(--accent);animation:lpulse 1.4s ease-in-out infinite}
+@keyframes lpulse{50%{opacity:.45;transform:scale(.88)}}
+.lob h4{margin:0 0 4px;font-size:17px}
+.lob p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.lbar{height:4px;border-radius:9px;margin:16px auto 0;max-width:180px;background:color-mix(in srgb,var(--accent) 14%,transparent);overflow:hidden}
+.lbar::after{content:"";display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:lslide 1.1s ease-in-out infinite}
+@keyframes lslide{from{transform:translateX(-110%)}to{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){.lsp::after,.lbar::after,.lsp .i{animation-duration:2.4s}}
+@media (min-width:780px){.wrap{max-width:760px}.stage{flex-direction:row;align-items:flex-start;justify-content:center}.stage canvas{flex:1 1 0;min-width:0}.row{max-width:340px;margin-left:auto;margin-right:auto}}
+@media (min-width:1100px){
+.wrap{max-width:1120px;display:grid;grid-template-columns:420px minmax(0,1fr);column-gap:22px;align-items:start}
+.hd,.note,.dev{grid-column:1/-1}
+.panel{grid-column:1}
+.pv{grid-column:2;grid-row:2/span 2;margin-top:12px;align-self:stretch}
+.pvi{position:sticky;top:16px}
+.pv .stage{margin-top:0}
+.pv .row{max-width:none}
+}
+@media (max-width:480px){.wrap{padding:12px 12px 36px}.hd h1{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-chl" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+<symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+<symbol id="i-id" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.6-1.6 1.7-2.2 3-2.2s2.4.6 3 2.2M14 10h5M14 14h3"/></symbol>
+<symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></symbol>
+<symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <header class="hd">
+    <div class="hd-top">
+      <div class="ic lg"><img src="logo.png" alt="BPI (CST) logo" width="44" height="44"></div>
+      <div class="hd-t"><small>Polytechnic Institute</small><span>BPI (CST)</span></div>
+      <a class="bk" href="class-routine.html" aria-label="Back to Class Routine"><svg class="i"><use href="#i-chl"/></svg></a>
+    </div>
+    <h1>Student ID Card Maker</h1>
+    <p>Add your photo and details, then create and download your ID card (front &amp; back)</p>
+    <div class="chips">
+      <span class="chip"><svg class="i"><use href="#i-id"/></svg> ID Card</span>
+      <span class="chip"><svg class="i"><use href="#i-dl"/></svg> PDF &amp; PNG</span>
+      <span class="chip"><svg class="i"><use href="#i-print"/></svg> Print</span>
+    </div>
+  </header>
+
+  <div class="panel">
+    <h3><svg class="i"><use href="#i-img"/></svg> Photo <small>Step 1 · Required</small></h3>
+    <label class="pick" id="pk" for="pf">
+      <span class="pi"><svg class="i"><use href="#i-cam"/></svg><img id="pth" alt=""></span>
+      <span class="pt"><b id="ptb">Choose photo</b><small id="pts">JPG / PNG · Max 15 MB</small></span>
+      <svg class="i"><use href="#i-arrow"/></svg>
+      <input id="pf" type="file" accept="image/*">
+    </label>
+    <div class="zoom" id="zw"><svg class="i"><use href="#i-zoom"/></svg><input id="zr" type="range" min="1" max="3" step="0.01" value="1" aria-label="Zoom"></div>
+    <p class="hint"><svg class="i"><use href="#i-info"/></svg><span>Choose a photo, then drag it inside the card to adjust. Your own clear face photo is required - the card cannot be downloaded or printed without it. A passport-size photo with a blue background looks best.</span></p>
+    <div class="err" id="perr"></div>
+  </div>
+
+  <div class="panel">
+    <h3><svg class="i"><use href="#i-user"/></svg> Details <small>Step 2</small></h3>
+    <label class="fl" for="fn">Student's Name <small style="font-weight:400">(required - your real name)</small></label>
+    <div class="fld" id="w-fn"><svg class="i"><use href="#i-user"/></svg><input id="fn" type="text" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="YOUR FULL NAME"></div>
+    <label class="fl" for="ff">Father's Name</label>
+    <div class="fld" id="w-ff"><svg class="i"><use href="#i-users"/></svg><input id="ff" type="text" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="FATHER'S FULL NAME"></div>
+    <label class="fl" for="fm">Mother's Name</label>
+    <div class="fld" id="w-fm"><svg class="i"><use href="#i-users"/></svg><input id="fm" type="text" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="MOTHER'S FULL NAME"></div>
+    <label class="fl" for="ft">Technology</label>
+    <div class="fld"><svg class="i"><use href="#i-pc"/></svg><input id="ft" type="text" maxlength="30" autocomplete="off" list="tech" placeholder="Computer Sciences"></div>
+    <datalist id="tech"><option value="Computer Sciences"><option value="Civil"><option value="Electrical"><option value="Electronics"><option value="Mechanical"><option value="Power"><option value="Architecture"></datalist>
+    <label class="fl" for="fs">Session</label>
+    <div class="fld"><svg class="i"><use href="#i-cal"/></svg><input id="fs" type="text" maxlength="12" autocomplete="off" placeholder="2026-27"></div>
+    <label class="fl" for="fcr">Class Roll</label>
+    <div class="fld" id="w-fcr"><svg class="i"><use href="#i-hash"/></svg><input id="fcr" type="text" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="2468115"></div>
+    <label class="fl" for="fbr">Board Roll <small style="font-weight:400">(optional)</small></label>
+    <div class="fld" id="w-fbr"><svg class="i"><use href="#i-hash"/></svg><input id="fbr" type="text" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="231295"></div>
+    <label class="fl" for="frg">Reg. No <small style="font-weight:400">(optional)</small></label>
+    <div class="fld" id="w-frg"><svg class="i"><use href="#i-hash"/></svg><input id="frg" type="text" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="1502407442"></div>
+  </div>
+
+  <div class="pv"><div class="pvi">
+  <div class="stage" id="stg"><canvas id="cv" width="1024" height="1536" aria-label="ID card front preview"></canvas><canvas id="cb" width="1024" height="1536" aria-label="ID card back preview"></canvas></div>
+
+  <div class="row">
+    <button class="go" id="dl" type="button"><svg class="i"><use href="#i-dl"/></svg><span>Download PDF</span></button>
+    <button class="go" id="di" type="button"><svg class="i"><use href="#i-img"/></svg><span>Download Image</span></button>
+    <button class="go" id="pr" type="button"><svg class="i"><use href="#i-print"/></svg><span>Print</span></button>
+    <button class="go clr" id="cl" type="button"><svg class="i"><use href="#i-trash"/></svg><span>Clear</span></button>
+  </div>
+  </div></div>
+  <p class="note"><svg class="i"><use href="#i-lock"/></svg> Your photo stays on your device and is never uploaded. When you download or print a card, your name, parents\u2019 names, class roll and IP address are recorded for the admin, to stop misuse. Misuse = IP blocked.</p>
+  <div class="dev"><button class="dv-t dvb" id="dvo" type="button" aria-haspopup="dialog"><img class="dvav" src="https://res.cloudinary.com/ddgebw6ej/image/upload/f_auto,q_auto/v1793109836/lacnibofhjqowmhxrmcn.jpg" alt="" width="28" height="28" loading="lazy" decoding="async" onerror="this.style.display='none'"><span>Developed by <b>Jamiul Hasan</b></span><svg class="i dvch" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button><a href="https://facebook.com/jamiul2168" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>Facebook</a></div>
+</div>
+<div class="mk" id="dv"><div class="dvmd" role="dialog" aria-modal="true" aria-labelledby="dvt">
+  <div class="dvhd"><div><h4 id="dvt">ডেভেলপার পরিচিতি</h4><small>BPI (CST) ক্লাস রুটিন</small></div><button class="dvx" id="dvx" type="button" aria-label="বন্ধ করুন"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="dvbody" id="dvb">
+    <div class="dvh">
+      <div class="dvph"><img src="https://res.cloudinary.com/ddgebw6ej/image/upload/f_auto,q_auto/v1793109836/lacnibofhjqowmhxrmcn.jpg" alt="Jamiul Hasan" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="dvfb">JH</div></div>
+      <h3 class="dvnm">Jamiul Hasan</h3>
+      <p class="dvsb">🎓 Lifelong Learner &amp; Innovator</p>
+      <div class="dvloc"><span>📍 From Barishal</span><span>🏠 Based in Barishal</span></div>
+    </div>
+    <div class="dvrl"><span>Student 🎓</span><span>Developer 👨‍💻</span><span>Blogger ✍️</span><span>Content Creator 🎥</span><span>Tech Enthusiast 💻</span><span>Cloud Architect ☁️</span><span>Web Developer 🌐</span><span>AI Enthusiast 🤖</span><span>IT Expert 🏆</span><span>Cybersecurity Learner 🔐</span></div>
+    <div class="dvbx"><h5><em>🚀</em>About Me</h5>
+      <p>I am a technology enthusiast with a strong interest in web development, cloud systems, and cybersecurity. I enjoy building practical, innovative solutions, from dynamic Blogger websites to secure personal cloud storage. I am constantly exploring new ideas and emerging technologies, with a particular focus on AI and cybersecurity.</p>
+    </div>
+    <div class="dvbx"><h5><em>💡</em>এই প্রজেক্ট কেন বানিয়েছি</h5>
+      <p>বরিশাল সরকারি পলিটেকনিক ইনস্টিটিউটের CST শিক্ষার্থী হিসেবে আমি লক্ষ্য করেছি, ক্লাস রুটিন, নোটিশ ও হোমওয়ার্কের আপডেট আলাদা আলাদা প্ল্যাটফর্মে ছড়িয়ে থাকায় সহপাঠীদের প্রয়োজনীয় তথ্য জানতে অসুবিধা হয়। তাই সবকিছু এক জায়গায় পাওয়ার জন্য আমি এই অ্যাপটি তৈরি করেছি, যা দ্রুত, নির্ভরযোগ্য এবং ব্যবহারে সহজ।</p>
+      <ul>
+        <li>এক ট্যাপেই যেকোনো তারিখের ক্লাস রুটিন দেখা যায়</li>
+        <li>নোটিশ ও হোমওয়ার্কের আপডেট দ্রুত পাওয়া যায়</li>
+        <li>শিক্ষকদের তথ্য, ছাত্র তালিকা ও গ্রুপ লিংক এক জায়গায় পাওয়া যায়</li>
+        <li>ইন্টারনেট ছাড়াও কাজ করে এবং সম্পূর্ণ ফ্রি</li>
+      </ul>
+    </div>
+    <div class="dvq">“Dream big, work hard, and make it happen!” 😊🔥</div>
+    <a class="dvfbk" href="https://facebook.com/jamiul2168" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>Facebook-এ যোগাযোগ করুন</a>
+  </div>
+  <div class="dvft"><button class="go" id="dvc" type="button">Close</button></div>
+</div></div>
+<div class="mk" id="mk" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="md">
+    <div class="mi"><svg class="i"><use href="#i-trash"/></svg></div>
+    <h4 id="mt">Clear everything?</h4>
+    <p>Your photo and all the details you entered will be removed from this device. This can't be undone.</p>
+    <div class="row"><button class="go" id="mn" type="button">Cancel</button><button class="go sol" id="my" type="button">Yes, clear</button></div>
+  </div>
+</div>
+<div class="mk" id="bk" role="alertdialog" aria-modal="true" aria-labelledby="bkt">
+  <div class="md">
+    <div class="mi"><svg class="i"><use href="#i-lock"/></svg></div>
+    <h4 id="bkt">ID Card বন্ধ করা হয়েছে</h4>
+    <p>আপনার এই ডিভাইস/নেটওয়ার্ক থেকে ID Card তৈরি করা ব্লক করা হয়েছে। আবার ব্যবহার করতে অ্যাডমিনের সাথে যোগাযোগ করুন।<br><small>You are blocked from using the ID card maker. Please contact the admin.</small></p>
+    <div class="row"><a class="go sol" href="https://facebook.com/jamiul2168" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">অ্যাডমিনের সাথে যোগাযোগ করুন</a></div>
+  </div>
+</div>
+<div class="lo" id="lo" role="alertdialog" aria-modal="true" aria-live="assertive" aria-labelledby="lot">
+  <div class="lob">
+    <div class="lsp"><svg class="i"><use href="#i-id"/></svg></div>
+    <h4 id="lot">অপেক্ষা করুন</h4>
+    <p id="los"></p>
+    <div class="lbar"></div>
+  </div>
+</div>
+<div class="toast" id="ts" role="status" aria-live="polite"></div>
+
+<script>
+(()=>{
+"use strict";
+const W=1024,H=1536,NAVY="#0b1a5c";
+const $=id=>document.getElementById(id);
+const cv=$("cv"),ctx=cv.getContext("2d"),cb=$("cb"),ctxB=cb.getContext("2d");
+const FONT='"IdSans","Roboto Condensed","Arial Narrow",Arial,sans-serif';
+const SERIF='"IdName","Times New Roman","Liberation Serif",Times,serif';
+
+// photo opening of the template (ellipse)
+const PC={x:511,y:436,rx:262,ry:253};
+const st={img:null,zoom:1,ox:0,oy:0};
+const tpl=new Image();
+tpl.onload=()=>draw();tpl.onerror=()=>draw();
+tpl.src="id-preview-front.jpg"; // low-res watermarked preview only; the real template comes from the server
+const tplB=new Image();
+tplB.onload=()=>draw();tplB.onerror=()=>draw();
+tplB.src="id-preview-back.jpg";
+if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load("600 58px IdSans"),document.fonts.load("700 96px IdName")]).then(draw,draw)}
+
+// empty field -> its placeholder (sample info) is shown on the preview
+const val=id=>{const e=$(id);return e.value.trim()||e.placeholder};
+
+// draw text: sx = base horizontal scale, sw = extra stroke (px) for a bolder look; squeezed further if wider than maxW
+function fit(c,t,x,y,maxW,font,color,align,sx,sw){
+  c.save();c.font=font;c.fillStyle=color;c.textBaseline="alphabetic";
+  sx=sx||1;const w=(c.measureText(t).width||1)*sx,k=sx*Math.min(1,maxW/w);
+  c.translate(x,y);c.scale(k,1);c.textAlign=align||"left";c.fillText(t,0,0);
+  if(sw){c.strokeStyle=color;c.lineWidth=sw;c.lineJoin="round";c.strokeText(t,0,0)}
+  c.restore();
+}
+
+function photo(c){
+  const {x,y,rx,ry}=PC;
+  c.save();c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.clip();
+  c.fillStyle="#2fa4f0";c.fillRect(x-rx,y-ry,rx*2,ry*2);
+  if(st.img){
+    const iw=st.img.naturalWidth,ih=st.img.naturalHeight;
+    const s=Math.max(rx*2/iw,ry*2/ih)*st.zoom,w=iw*s,h=ih*s;
+    c.drawImage(st.img,x-w/2+st.ox,y-h/2+st.oy,w,h);
+  }else{
+    c.fillStyle="rgba(255,255,255,.9)";
+    c.beginPath();c.arc(x,y-40,74,0,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(x,y+150,140,105,0,Math.PI,0);c.fill();
+    fit(c,"PHOTO",x,y+225,240,"700 40px "+FONT,"#1d6fb8","center");
+  }
+  c.restore();
+}
+
+function details(c){
+  // name: bold condensed serif, same look as the sample card
+  fit(c,val("fn").toUpperCase(),512,837,935,"700 96px "+SERIF,NAVY,"center",.78,1.2);
+  const rows=[["Father\u2019s Name",val("ff").toUpperCase()],["Mother\u2019s Name",val("fm").toUpperCase()],["Technology",val("ft")],["Session",val("fs")]];
+  rows.forEach((r,i)=>{
+    const y=946+i*80.5;
+    fit(c,r[0],41,y,350,"600 58px "+FONT,NAVY,"left",.94,.6);
+    fit(c,":",401,y,20,"600 58px "+FONT,NAVY,"left",1,.6);
+    fit(c,r[1],432,y,560,"600 60px "+FONT,NAVY,"left",1.02,.6);
+  });
+}
+
+function render(c,scale,T){
+  c.save();c.setTransform(scale,0,0,scale,0,0);
+  if(T)c.drawImage(T,0,0,W,H);else if(tpl.complete&&tpl.naturalWidth)c.drawImage(tpl,0,0,W,H);else{c.fillStyle="#fff";c.fillRect(0,0,W,H)}
+  photo(c);details(c);
+  c.restore();
+}
+// back side: class roll / board roll / reg. no go on the lines of the top plate
+function back(c){
+  const rows=[["fcr",122],["fbr",177],["frg",232]];
+  rows.forEach(r=>fit(c,$(r[0]).value.trim(),510,r[1],290,"600 56px "+FONT,NAVY,"left",1.12,1.4));
+}
+function renderBack(c,scale,T){
+  c.save();c.setTransform(scale,0,0,scale,0,0);
+  if(T)c.drawImage(T,0,0,W,H);else if(tplB.complete&&tplB.naturalWidth)c.drawImage(tplB,0,0,W,H);else{c.fillStyle="#fff";c.fillRect(0,0,W,H)}
+  back(c);
+  c.restore();
+}
+// remember details + photo on this device so a refresh does not wipe them
+const KEY="bpi-id-card-v1",IDS=["fn","ff","fm","ft","fs","fcr","fbr","frg"];
+let svT,live=false;
+function persist(){
+  if(!live)return;clearTimeout(svT);
+  svT=setTimeout(()=>{try{const f={};IDS.forEach(i=>f[i]=$(i).value);
+    localStorage.setItem(KEY,JSON.stringify({f,z:st.zoom,x:st.ox,y:st.oy,p:st.pd||"",n:st.pn||""}))}catch(_){}},250);
+}
+function draw(){ctx.clearRect(0,0,W,H);render(ctx,1);ctxB.clearRect(0,0,W,H);renderBack(ctxB,1);persist()}
+
+
+
+// ---- toast + button loader (same behaviour as the main site) ----
+let tt;
+function toast(m,bad){const t=$("ts");lo(false);t.textContent=m;t.classList.toggle("bad",!!bad);t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),bad?4200:2600)}
+// full-screen loading overlay (hidden automatically by the next toast, or after 30 s)
+let loT;
+function lo(on,title,sub){
+  const e=$("lo");if(!e)return;clearTimeout(loT);
+  if(!on){e.classList.remove("show");return}
+  $("lot").textContent=title||"অপেক্ষা করুন";$("los").textContent=sub||"";e.classList.add("show");
+  loT=setTimeout(()=>e.classList.remove("show"),3e4);
+}
+// every error is shown as the same side popup as the main routine page
+function pop(title,bn,en,focusEl){toast(bn,true);if(focusEl){try{focusEl.focus()}catch(_){}}}
+function busy(b,ms){b.classList.add("ld");b.setAttribute("aria-busy","true");setTimeout(()=>{b.classList.remove("ld");b.removeAttribute("aria-busy")},ms||450)}
+
+// ---- inputs ----
+["fn","ff","fm","ft","fs","fcr","fbr","frg"].forEach(id=>$(id).addEventListener("input",()=>{const w=$(id).parentNode;w.classList.remove("bad");draw()}));
+["fcr","fbr","frg"].forEach(id=>$(id).addEventListener("input",e=>{const p=e.target.selectionStart;e.target.value=e.target.value.replace(/[^0-9]/g,"");try{e.target.setSelectionRange(p,p)}catch(_){}draw()}));
+["fn","ff","fm"].forEach(id=>$(id).addEventListener("input",e=>{const p=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();try{e.target.setSelectionRange(p,p)}catch(_){}draw()}));
+
+// a real human photo is required: use the browser's built-in face detector when it exists
+// (Chrome / Edge / Android); on browsers without it the photo is still mandatory.
+let faceP=null;
+function loadFaceLib(){
+  if(faceP)return faceP;
+  faceP=new Promise((ok,no)=>{
+    const sc=document.createElement("script");sc.src="face-api.js";sc.onload=()=>ok();sc.onerror=()=>no(new Error("lib"));document.head.appendChild(sc);
+  }).then(()=>faceapi.nets.tinyFaceDetector.loadFromUri("face-models")).catch(e=>{faceP=null;throw e});
+  return faceP;
+}
+// real face check: a small detector model that ships with the site and runs on every device (nothing is uploaded).
+// Drawings / cartoons / objects / scenery are not accepted; a real face must be found.
+function hasFace(im){
+  lo(true,"ছবি যাচাই হচ্ছে","মুখ শনাক্ত করা হচ্ছে, একটু অপেক্ষা করুন");
+  return loadFaceLib().then(()=>{
+    const k=Math.min(1,640/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement("canvas");
+    c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));
+    c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+    return faceapi.detectAllFaces(c,new faceapi.TinyFaceDetectorOptions({inputSize:416,scoreThreshold:.5}));
+  }).then(r=>{lo(false);return r.length>0},e=>{lo(false);throw e});
+}
+// ---- name check (same rules on the page and on the server) ----
+const BADW=new Set("FUCK FUCKER SHIT BITCH SEX SEXY PORN PORNO DICK COCK PUSSY BASTARD SLUT WHORE NIGGA NIGGER RAPE LESBO IDIOT STUPID DUMB FOOL LOSER NOOB CHUTIA GANDU MAGI MAGIR KHANKI KHANKIR CHODA CHUDA CHUDI BOKACHODA BOKACHUDA HARAMI HARAMZADA HARAMJADA KUTTA KUTTAR KUKUR SHUOR SHUWOR BAICHOD BEYADOB HIJRA".split(" "));
+const BADSUB=["FUCK","SHIT","BITCH","PORN","KHANKI","CHODA","GANDU","HARAMI","KUTTA","PUSSY","ASSHOLE","NIGGA","BASTARD","WHORE"];
+const NONW=new Set("TEST TESTING DEMO FAKE NAME FULLNAME YOURNAME USER USERNAME STUDENT FATHER MOTHER MOM DAD NULL NONE NA UNKNOWN ADMIN HACKER HACK BOT ROBOT JOKER VIRUS ANONYMOUS NOBODY SAMPLE EXAMPLE ABC XYZ ASDF QWERTY KILLER MONSTER DEMON DEVIL GHOST".split(" "));
+const SEQ=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM","ABCDEFGHIJKLMNOPQRSTUVWXYZ"].flatMap(r=>[r,[...r].reverse().join("")]);
+// returns "" when the name looks real, otherwise: empty | chars | short | bad | junk
+function nameBad(n){
+  n=String(n||"").trim().replace(/\s+/g," ").toUpperCase();
+  if(!n)return"empty";
+  if(n.length>40||!/^[A-Z][A-Z .'\-]*$/.test(n))return"chars";
+  const T=n.split(/[ .'\-]+/).filter(Boolean),L=n.replace(/[^A-Z]/g,"");
+  if(L.length<3)return"short";
+  if(T.some(t=>BADW.has(t))||BADSUB.some(w=>L.includes(w)))return"bad";
+  if(T.some(t=>NONW.has(t))||NONW.has(L))return"junk";
+  if(!/[AEIOUY]/.test(L)||new Set(L).size<3||/(.)\1{2,}/.test(L)||/([A-Z]{1,3})\1{2,}/.test(L)||/[^AEIOUY]{5,}/.test(L))return"junk";
+  if(T.some(t=>t.length>=4&&!/[AEIOUY]/.test(t)))return"junk";
+  for(let i=0;i+4<=L.length;i++)if(SEQ.some(r=>r.includes(L.slice(i,i+4))))return"junk";
+  if(T.filter(t=>t.length===1).length>2)return"junk";
+  const c={};for(const t of T){c[t]=(c[t]||0)+1;if(c[t]>=3)return"junk"}
+  return"";
+}
+// student, father and mother must be three different names
+const sameNames=(a,b,c)=>{const f=x=>String(x||"").trim().replace(/\s+/g," ").toUpperCase(),A=f(a),B=f(b),C=f(c);return A===B||A===C||B===C};
+$("pf").addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0],er=$("perr");er.style.display="none";
+  if(!f)return;
+  if(!/^image\//.test(f.type)){er.textContent="Please choose an image (JPG/PNG).";er.style.display="block";pop("ছবি সমস্যা","শুধু ছবি (JPG/PNG) দিন।","Please choose an image (JPG/PNG).");return}
+  if(f.size>15*1024*1024){er.textContent="Image size must be under 15 MB.";er.style.display="block";pop("ছবি সমস্যা","ছবির সাইজ ১৫ MB এর কম হতে হবে।","Image size must be under 15 MB.");return}
+  $("pk").classList.remove("bad");const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{ hasFace(im).then(ok=>{
+    if(!ok){er.textContent="No human face found in this photo. Please choose a clear photo of your own face.";er.style.display="block";pop("ছবি সমস্যা","ছবিতে মানুষের মুখ পাওয়া যায়নি। আপনার নিজের মুখের স্পষ্ট ছবি দিন।","No human face found in this photo. Please choose a clear photo of your own face.");
+      URL.revokeObjectURL(url);$("pf").value="";return}
+    st.img=im;st.zoom=1;st.ox=0;st.oy=0;$("zr").value=1;$("zw").classList.add("show");
+    try{const k=Math.min(1,1000/Math.max(im.naturalWidth,im.naturalHeight)),t=document.createElement("canvas");
+      t.width=Math.round(im.naturalWidth*k);t.height=Math.round(im.naturalHeight*k);t.getContext("2d").drawImage(im,0,0,t.width,t.height);
+      st.pd=t.toDataURL("image/jpeg",.9);st.pn=f.name}catch(_){st.pd="";st.pn=""}
+    $("pth").src=url;$("pk").classList.add("has");$("ptb").textContent="Change photo";$("pts").textContent=f.name;
+    draw();toast("ছবি যাচাই হয়েছে");
+  }).catch(()=>{pop("ছবি যাচাই করা যায়নি","ছবি যাচাইয়ের মডেল লোড হয়নি। ইন্টারনেট চেক করে আবার চেষ্টা করুন।","Could not verify the photo. Check your internet and try again.");URL.revokeObjectURL(url);$("pf").value=""})};
+  im.onerror=()=>{er.textContent="Could not open this image, please try another one.";er.style.display="block";pop("ছবি সমস্যা","এই ছবিটি খোলা যায়নি, অন্য ছবি দিন।","Could not open this image, please try another one.");URL.revokeObjectURL(url)};
+  im.src=url;
+});
+function clampPan(){
+  if(!st.img)return;
+  const iw=st.img.naturalWidth,ih=st.img.naturalHeight,s=Math.max(PC.rx*2/iw,PC.ry*2/ih)*st.zoom;
+  const mx=Math.max(0,(iw*s-PC.rx*2)/2),my=Math.max(0,(ih*s-PC.ry*2)/2);
+  st.ox=Math.min(mx,Math.max(-mx,st.ox));st.oy=Math.min(my,Math.max(-my,st.oy));
+}
+$("zr").addEventListener("input",e=>{st.zoom=+e.target.value;clampPan();draw()});
+
+// drag the photo
+let drag=null;
+const pt=e=>{const b=cv.getBoundingClientRect();return[(e.clientX-b.left)*W/b.width,(e.clientY-b.top)*H/b.height]};
+cv.addEventListener("pointerdown",e=>{
+  if(!st.img)return;const [x,y]=pt(e);
+  if(Math.hypot((x-PC.x)/PC.rx,(y-PC.y)/PC.ry)>1.08)return;
+  drag={x,y,ox:st.ox,oy:st.oy};cv.setPointerCapture(e.pointerId);cv.classList.add("drag");
+});
+cv.addEventListener("pointermove",e=>{
+  if(!drag)return;const [x,y]=pt(e);
+  st.ox=drag.ox+x-drag.x;st.oy=drag.oy+y-drag.y;clampPan();draw();
+});
+const end=()=>{drag=null;cv.classList.remove("drag")};
+cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+// touch: block page scroll only while the photo itself is being dragged, so the rest of the card scrolls normally
+cv.addEventListener("touchmove",e=>{if(drag&&e.cancelable)e.preventDefault()},{passive:false});
+cv.addEventListener("wheel",e=>{
+  if(!st.img)return;
+  const [x,y]=pt(e);
+  if(Math.hypot((x-PC.x)/PC.rx,(y-PC.y)/PC.ry)>1.08)return; // outside the photo: let the page scroll
+  e.preventDefault();
+  st.zoom=Math.min(3,Math.max(1,st.zoom+(e.deltaY<0?.08:-.08)));$("zr").value=st.zoom;clampPan();draw();
+},{passive:false});
+
+// ---- export ----
+// the main fields must be filled, otherwise the sample info would be exported
+function ready(){
+  // 1) a photo must be added
+  if(!st.img){
+    $("pk").classList.add("bad");
+    const er=$("perr");er.textContent="A photo is required. Please add your own photo first.";er.style.display="block";
+    try{$("pk").scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}
+    pop("ছবি দিন","ছবি ছাড়া ID Card বানানো যাবে না। আপনার নিজের স্পষ্ট ছবি দিন।","A photo is required. Please add your own photo first.",$("pk"));
+    return false;
+  }
+  // 2) the student's real name, father's name and mother's name must be written and must look real
+  const ids=["fn","ff","fm","fcr"];
+  const miss=ids.filter(id=>!$(id).value.trim());
+  const LBL={fn:"ছাত্রের নামে",ff:"বাবার নামে",fm:"মায়ের নামে"},LB2={fn:"ছাত্রের নাম",ff:"বাবার নাম",fm:"মায়ের নাম"},why={};
+  ["fn","ff","fm"].forEach(id=>{if($(id).value.trim()){const r=nameBad($(id).value);if(r)why[id]=r}});
+  const badName=Object.keys(why),dup=!badName.length&&!miss.length&&sameNames($("fn").value,$("ff").value,$("fm").value);
+  ids.forEach(id=>$(id).parentNode.classList.toggle("bad",miss.includes(id)||badName.includes(id)||(dup&&id!=="fcr")));
+  if(miss.length||badName.length||dup){
+    const e=$(miss.length?miss[0]:badName.length?badName[0]:"fm");e.focus();
+    try{e.parentNode.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}
+    if(miss.length)pop("","আপনার নাম, বাবা-মায়ের নাম ও ক্লাস রোল দিন।","",e);
+    else if(badName.length){
+      const k=badName[0],r=why[k];
+      pop("",r==="bad"?LBL[k]+" অনুপযুক্ত বা অশালীন শব্দ আছে। আসল নাম লিখুন।":r==="chars"?LB2[k]+" শুধু ইংরেজি অক্ষরে লিখুন (সংখ্যা/চিহ্ন চলবে না)।":LB2[k]+" সঠিক নয়। আসল নাম লিখুন।","",e);
+      // tell the admin about the attempt (fire-and-forget; only for junk / inappropriate names)
+      if(r==="bad"||r==="junk")try{sendCheck("bad")}catch(_){}
+    }else pop("","ছাত্র, বাবা ও মায়ের নাম আলাদা আলাদা হতে হবে।","",e);
+    return false;
+  }
+  return true;
+}
+// high-resolution render (2x = 2048x3072 px, about 960 dpi at the 54x81 mm print size)
+const HI=2;
+let FULL=null,fullT;
+function makeBlob(isBack,cb,type,q){
+  // the real template exists only after the server check (FULL); without it nothing can be exported
+  if(!FULL){cb(null);return}
+  const o=document.createElement("canvas");o.width=W*HI;o.height=H*HI;
+  (isBack?renderBack:render)(o.getContext("2d"),HI,isBack?FULL.b:FULL.f);o.toBlob(cb,type||"image/png",q);
+}
+// tiny PDF writer: one A4 page, front + back side by side at the real card size (54 x 81 mm), JPEG kept as-is
+function makePdf(imgs){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const put=x=>{const u=typeof x==="string"?enc.encode(x):x;parts.push(u);len+=u.length};
+  const obj=(n,fn)=>{offs[n]=len;put(n+" 0 obj\n");fn();put("\nendobj\n")};
+  const mm=v=>v*72/25.4,PW=595.28,PH=841.89,cw=mm(54),ch=mm(81),gap=mm(8),x0=(PW-(cw*2+gap))/2,y0=PH-mm(12)-ch;
+  const f=n=>n.toFixed(2);
+  const ct=imgs.map((_,k)=>"q "+f(cw)+" 0 0 "+f(ch)+" "+f(x0+k*(cw+gap))+" "+f(y0)+" cm /Im"+k+" Do Q").join("\n");
+  put("%PDF-1.4\n");
+  obj(1,()=>put("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>put("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+  obj(3,()=>put("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+PW+" "+PH+"] /Resources << /XObject << "+imgs.map((_,k)=>"/Im"+k+" "+(5+k)+" 0 R").join(" ")+" >> >> /Contents 4 0 R >>"));
+  obj(4,()=>put("<< /Length "+ct.length+" >>\nstream\n"+ct+"\nendstream"));
+  imgs.forEach((im,k)=>obj(5+k,()=>{
+    put("<< /Type /XObject /Subtype /Image /Width "+im.w+" /Height "+im.h+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+im.d.length+" >>\nstream\n");
+    put(im.d);put("\nendstream");
+  }));
+  const n=5+imgs.length,xr=len;
+  put("xref\n0 "+n+"\n0000000000 65535 f \n");
+  for(let k=1;k<n;k++)put(String(offs[k]).padStart(10,"0")+" 00000 n \n");
+  put("trailer\n<< /Size "+n+" /Root 1 0 R >>\nstartxref\n"+xr+"\n%%EOF");
+  return new Blob(parts,{type:"application/pdf"});
+}
+function save(b,name){
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+// ---- server check: blocked IPs are stopped, and every download / print is recorded for the admin ----
+const API="https://api.class-routine.jhbd.dev.cv";
+function sendCheck(act,kind){
+  const body={act,kind};
+  if(act==="make"||act==="bad"){body.name=$("fn").value;body.father=$("ff").value;body.mother=$("fm").value;body.roll=$("fcr").value;body.tech=$("ft").value;body.sess=$("fs").value}
+  return fetch(API+"/api/id/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    .then(r=>r.json().catch(()=>({})).then(j=>({st:r.status,j})));
+}
+// fetch the real, full-quality template with the one-time ticket; kept in memory for a minute only
+function loadFull(t){
+  const get=s=>fetch(API+"/api/id/tpl?t="+encodeURIComponent(t)+"&s="+s).then(r=>{
+    if(r.status===403){return r.json().catch(()=>({})).then(j=>{if(j.blocked){showBlock();throw 0}throw j.error||1})}
+    if(!r.ok)return r.json().catch(()=>({})).then(j=>{throw j.error||1});
+    return r.blob();
+  }).then(b=>createImageBitmap(b));
+  return Promise.all([get("f"),get("b")]).then(([f,b])=>{
+    FULL={f,b};clearTimeout(fullT);fullT=setTimeout(()=>{FULL=null},6e4);return true;
+  }).catch(e=>{
+    if(e!==0)pop("কার্ড টেমপ্লেট পাওয়া যায়নি","কার্ডের ডিজাইন লোড করা যায়নি। আবার চেষ্টা করুন, না হলে অ্যাডমিনকে জানান।",typeof e==="string"?e:"Could not load the card template. Please try again.");
+    return false;
+  });
+}
+function showBlock(){lo(false);$("bk").classList.add("show");document.body.classList.add("lock")}
+// a blocked person sees the "contact admin" screen as soon as the page opens
+sendCheck("open").then(r=>{if(r.j&&r.j.blocked)showBlock()}).catch(()=>{});
+function gate(kind){
+  return sendCheck("make",kind).then(r=>{
+    if(r.j&&r.j.blocked){showBlock();return false}
+    if(r.st>=400){pop("যাচাই করা যায়নি","ID Card বানানো যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন, সমস্যা থাকলে অ্যাডমিনকে জানান।",r.j.error||"Could not verify, please try again.");return false}
+    return r.j.t||false;
+  }).catch(()=>{pop("ইন্টারনেট দরকার","ডাউনলোড বা প্রিন্টের জন্য ইন্টারনেট সংযোগ লাগবে। সংযোগ দিয়ে আবার চেষ্টা করুন।","Internet connection is needed to download or print.");return false});
+}
+// runs before the download / print handlers below: they only start when the server says OK
+let passed=false;
+["dl","di","pr"].forEach(id=>$(id).addEventListener("click",e=>{
+  if(passed){passed=false;return}
+  e.stopImmediatePropagation();e.preventDefault();
+  const el=e.currentTarget;if(!ready())return;
+  lo(true,"যাচাই করা হচ্ছে","আপনার তথ্য ও ডিভাইস যাচাই করা হচ্ছে");
+  gate(id).then(t=>{if(t)lo(true,"কার্ড তৈরি হচ্ছে","ডিজাইন লোড হচ্ছে, ডাউনলোডের জন্য প্রস্তুত করা হচ্ছে");return t&&loadFull(t)})
+    .then(ok=>{if(ok){passed=true;el.click();if(id==="pr")setTimeout(()=>lo(false),1500)}else lo(false)});
+},true));
+// image download: one high-quality PNG with front + back side by side
+$("di").addEventListener("click",e=>{
+  const btn=e.currentTarget;if(!ready())return;busy(btn,1800);
+  const nm=$("fn").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"student";
+  const get=isBack=>new Promise(r=>makeBlob(isBack,b=>r(b))).then(b=>createImageBitmap(b));
+  Promise.all([get(false),get(true)]).then(([a,b])=>{
+    const w=W*HI,h=H*HI,m=60,o=document.createElement("canvas");o.width=w*2+m*3;o.height=h+m*2;
+    const x=o.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,o.width,o.height);
+    x.drawImage(a,m,m);x.drawImage(b,w+m*2,m);
+    o.toBlob(bl=>{if(!bl)throw 0;save(bl,"id-card-"+nm+".png");toast("ID Card ইমেজ ডাউনলোড হচ্ছে (সামনে ও পেছনে)")},"image/png");
+  }).catch(()=>pop("ইমেজ তৈরি হয়নি","ইমেজ তৈরি করা যায়নি, আবার চেষ্টা করুন।","Could not create the image, please try again."));
+});
+// one download = one PDF with both sides, print-ready
+$("dl").addEventListener("click",e=>{
+  const btn=e.currentTarget;if(!ready())return;busy(btn,1500);
+  const nm=$("fn").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"student";
+  const get=isBack=>new Promise(r=>makeBlob(isBack,b=>r(b),"image/jpeg",.97)).then(b=>b.arrayBuffer()).then(d=>({d:new Uint8Array(d),w:W*HI,h:H*HI}));
+  Promise.all([get(false),get(true)]).then(im=>{
+    save(makePdf(im),"id-card-"+nm+".pdf");
+    toast("ID Card PDF ডাউনলোড হচ্ছে (সামনে ও পেছনে)");
+  }).catch(()=>pop("ফাইল তৈরি হয়নি","ফাইল তৈরি করা যায়নি, আবার চেষ্টা করুন।","Could not create the file, please try again."));
+});
+$("pr").addEventListener("click",e=>{
+  const btn=e.currentTarget;if(!ready())return;busy(btn,900);
+  makeBlob(false,f=>makeBlob(true,k=>{
+    if(!f||!k)return;
+    const u1=URL.createObjectURL(f),u2=URL.createObjectURL(k),fr=document.createElement("iframe");
+    fr.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+    fr.onload=()=>{
+      const go=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch(_){window.open(u1)}setTimeout(()=>{fr.remove();URL.revokeObjectURL(u1);URL.revokeObjectURL(u2)},60000)};
+      let ims=[];try{ims=[...fr.contentDocument.querySelectorAll("img")]}catch(_){}
+      let n=ims.filter(i=>!i.complete).length;
+      if(!n)return go();
+      ims.forEach(i=>{if(!i.complete)i.onload=()=>{if(--n===0)go()}});
+    };
+    fr.srcdoc='<!doctype html><title>ID Card</title><style>@page{size:A4;margin:12mm}html,body{margin:0}body{display:flex;gap:8mm;justify-content:center;align-items:flex-start}img{width:54mm;height:81mm;display:block}</style><img src="'+u1+'"><img src="'+u2+'">';
+    document.body.appendChild(fr);
+  }));
+});
+const dv=$("dv");
+function dvT(on){dv.classList.toggle("show",on);document.body.classList.toggle("lock",on);if(on){$("dvb").scrollTop=0;$("dvc").focus()}else $("dvo").focus()}
+$("dvo").addEventListener("click",()=>dvT(true));
+$("dvx").addEventListener("click",()=>dvT(false));
+$("dvc").addEventListener("click",()=>dvT(false));
+dv.addEventListener("click",e=>{if(e.target===dv)dvT(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&dv.classList.contains("show"))dvT(false)});
+const mk=$("mk");
+function ask(on){mk.classList.toggle("show",on);if(on)$("mn").focus();else $("cl").focus()}
+$("cl").addEventListener("click",()=>ask(true));
+$("mn").addEventListener("click",()=>ask(false));
+mk.addEventListener("click",e=>{if(e.target===mk)ask(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&mk.classList.contains("show"))ask(false)});
+$("my").addEventListener("click",()=>{
+  ask(false);
+  IDS.forEach(i=>{$(i).value="";$(i).parentNode.classList.remove("bad")});
+  st.img=null;st.zoom=1;st.ox=0;st.oy=0;st.pd="";st.pn="";$("zr").value=1;$("zw").classList.remove("show");
+  $("pk").classList.remove("has");$("pth").removeAttribute("src");$("ptb").textContent="Choose photo";$("pts").textContent="JPG / PNG \u00b7 Max 15 MB";
+  $("pf").value="";$("perr").style.display="none";
+  try{localStorage.removeItem(KEY)}catch(_){}
+  draw();toast("সব তথ্য মুছে ফেলা হয়েছে");
+});
+// restore what was saved before the refresh
+try{
+  const d=JSON.parse(localStorage.getItem(KEY)||"null");
+  if(d){
+    IDS.forEach(i=>{if(d.f&&typeof d.f[i]==="string")$(i).value=d.f[i]});
+    st.zoom=+d.z||1;st.ox=+d.x||0;st.oy=+d.y||0;
+    if(d.p){
+      st.pd=d.p;st.pn=d.n||"";
+      const im=new Image();
+      im.onload=()=>{st.img=im;$("zr").value=st.zoom;$("zw").classList.add("show");$("pth").src=d.p;$("pk").classList.add("has");
+        $("ptb").textContent="Change photo";$("pts").textContent=st.pn||"Saved photo";clampPan();draw()};
+      im.src=d.p;
+    }
+  }
+}catch(_){}
+live=true;
+draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+PRIVATE_templates/
+node_modules/
+.wrangler/
+.dev.vars
+.env

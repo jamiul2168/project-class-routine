@@ -1,0 +1,17 @@
+name = "class-routine-backend"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Cloudflare Dashboard -> Storage & Databases -> D1 theke name ar id niye boshan
+[[d1_databases]]
+binding = "DB"
+database_name = "YOUR_DB_NAME"
+database_id = "YOUR_DB_ID"
+
+# Cloudflare Dashboard -> R2 theke bucket name boshan
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "YOUR_BUCKET_NAME"
+
+# PEPPER ar SETUP_KEY secret GitHub e rakhben na.
+# Worker -> Settings -> Variables and Secrets e din.
