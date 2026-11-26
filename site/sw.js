@@ -1,5 +1,5 @@
 // Class Routine – offline-capable service worker
-const VERSION = "cr-v34";
+const VERSION = "cr-v35";
 const SHELL = VERSION + "-shell";     // app files (page, icons, fonts)
 const RUNTIME = VERSION + "-runtime"; // notice files, routine images, etc.
 
