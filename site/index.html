@@ -785,7 +785,7 @@ a.ni{text-decoration:none}.flh{margin:16px 4px 8px;font-size:12.5px;font-weight:
 </style>
 <script>const CR_API="https://api.class-routine.jhbd.dev.cv";
 function crLoad(b,p,min){if(!b||b.classList.contains("ld"))return p;min=min==null?400:min;b.classList.add("ld");b.setAttribute("aria-busy","true");const t=Date.now();Promise.resolve(p).catch(()=>{}).then(()=>new Promise(r=>setTimeout(r,Math.max(0,min-(Date.now()-t))))).then(()=>{b.classList.remove("ld");b.removeAttribute("aria-busy")});return p}
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".act:not(.soon),.go,.ni");if(b)crLoad(b,null,450)},true);
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".act:not(.soon),.go,.ni,.exhero");if(b)crLoad(b,null,450)},true);
 const __goApp=c=>{
  const S=(c&&c.settings&&c.settings[0])||{},u=String(S.appUrl||"").trim();
  if(!(matchMedia("(display-mode: standalone)").matches||navigator.standalone)||!navigator.onLine||!/^https?:\/\//i.test(u))return;
@@ -1724,6 +1724,14 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
 .item.exit .tag.exwt.now .bd1{background:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.2)!important}
 .item.exit .tag.exwt.soon .bd1{background:#b45309!important;box-shadow:0 0 0 3px rgba(180,83,9,.2)!important}
 .item.exit .tag.exwt.past .bd1{background:#64748b!important;box-shadow:0 0 0 3px rgba(100,116,139,.2)!important}
+.exhero{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin:14px 0 0;padding:12px 14px;border-radius:20px;border:1px solid color-mix(in srgb,#ec4899 35%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#ec4899 11%,var(--card)),var(--card) 70%);color:var(--text);font-family:inherit;text-align:left;cursor:pointer;box-shadow:var(--sh1);transition:transform .15s}
+.exhero[hidden]{display:none}.exhero:active{transform:scale(.98)}
+.exhero .exh-i{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#ec4899,#db2777);color:#fff;box-shadow:0 8px 18px -8px rgba(219,39,119,.6)}
+.exhero .i{width:22px;height:22px}
+.exhero .exh-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.exhero .exh-t b{font-size:15px;font-weight:800;line-height:1.3}
+.exhero .exh-t small{margin-top:2px;font-size:12px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+.exhero .exh-a{flex:none;color:#db2777}.exhero .exh-a .i{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -1794,6 +1802,7 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
     <div class="wkq"><div class="wkq-h"><svg class="i"><use href="#i-cal"/></svg><span>Weekly Routine <em id="wkl">· Current week</em></span></div>
       <button class="wkb wk1" id="wkd" type="button"><svg class="i"><use href="#i-img"/></svg><span><b>সাপ্তাহিক রুটিন দেখুন</b><small id="wkr">রবিবার থেকে বৃহস্পতিবার</small></span><svg class="i wkgo"><use href="#i-chr"/></svg></button></div>
   </div>
+  <button class="exhero" id="exo" type="button" hidden><span class="exh-i"><svg class="i"><use href="#i-edit"/></svg></span><span class="exh-t"><b>Exam Routine</b><small id="exc">পরীক্ষার রুটিন</small></span><span class="exh-a"><svg class="i"><use href="#i-chr"/></svg></span></button>
   <section class="cats"><h3 class="ch"><span class="chi"><svg class="i"><use href="#i-grid"/></svg></span> Explore</h3>
   <div class="acts">
     <button class="act cv" id="cvo" type="button"><span class="ai"><svg class="i"><use href="#i-file"/></svg></span><span class="at2">Cover Page</span><small id="cvc"></small></button>
@@ -1805,7 +1814,6 @@ background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2
     <button class="act nt" id="nto" type="button"><span class="ai"><svg class="i"><use href="#i-bell"/></svg></span><span class="at2">Notices</span><small id="ncnt"></small></button>
     <button class="act st" id="sto" type="button"><span class="ai"><svg class="i"><use href="#i-users"/></svg></span><span class="at2">Student List</span><small>Names &amp; roll</small></button>
     <button class="act fb" id="fbo" type="button"><span class="ai"><svg class="i"><use href="#i-edit"/></svg></span><span class="at2">Feedback</span><small>আপনার মতামত দিন</small></button>
-    <button class="act ex" id="exo" type="button"><span class="ai"><svg class="i"><use href="#i-edit"/></svg></span><span class="at2">Exam Routine</span><small id="exc">পরীক্ষার রুটিন</small></button>
   </div></section>
   <section class="cats soonsec"><h3 class="ch"><span class="chi"><svg class="i"><use href="#i-clock"/></svg></span> Coming soon</h3>
   <div class="acts">
@@ -2721,7 +2729,7 @@ async function exFull(){
  try{const eb=await exBuild();if(!eb)return;pg.push(await jp(eb.blob))}catch(e){toast("ডাউনলোড করা যায়নি");return}
  await exDown(exPdf(pg),"Full-Routine-"+GROUP+".pdf","পুরো রুটিন ডাউনলোড হয়েছে")}
 $("fulb").onclick=e=>crLoad(e.currentTarget,exFull());
-{const ec=()=>{const e=$("exc");if(!e)return;const L=exList(),up=L.filter(x=>exWhen(x.d).c!=="past");e.textContent=!L.length?"এখনো দেওয়া হয়নি":up.length?"বাকি "+bn(up.length)+"টি পরীক্ষা":"সব পরীক্ষা শেষ"};
+{const ec=()=>{const e=$("exc");if(!e)return;const L=exList(),up=L.filter(x=>exWhen(x.d).c!=="past");e.textContent=!L.length?"এখনো দেওয়া হয়নি":up.length?"বাকি "+bn(up.length)+"টি পরীক্ষা · পরের: "+exName(up[0])+" ("+exWhen(up[0].d).t+")":"সব পরীক্ষা শেষ";const h=$("exo");if(h)h.hidden=!L.length};
  __d(()=>{try{ec()}catch(e){}});document.querySelectorAll(".g").forEach(b=>b.addEventListener("click",()=>{try{ec()}catch(e){}}));
  $("exo").onclick=()=>{let n=0;try{n=exList().length}catch(e){}if(!n){toast("এই গ্রুপের পরীক্ষার রুটিন এখনো দেওয়া হয়নি");return}ETAB=true;$("d").value=iso(autoDate());show()}}
 

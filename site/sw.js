@@ -1,5 +1,5 @@
 // Class Routine – offline-capable service worker
-const VERSION = "cr-v33";
+const VERSION = "cr-v34";
 const SHELL = VERSION + "-shell";     // app files (page, icons, fonts)
 const RUNTIME = VERSION + "-runtime"; // notice files, routine images, etc.
 
@@ -89,6 +89,8 @@ self.addEventListener("fetch", e => {
       }
       const net = fetch(req).then(async r => {
         if (r && r.ok) await cache.put(req.url.split("#")[0], await clean(r.clone()));
+        // page was removed from the site: forget the saved copy so it stops opening
+        else if (r && r.status === 404) await cache.delete(req.url.split("#")[0], { ignoreSearch: true });
         return r;
       }).catch(() => null);
       if (hit) { e.waitUntil(net); return hit; }

@@ -1,0 +1,10 @@
+{
+  // IMPORTANT: "name" must be exactly the name of your existing Worker
+  // (Cloudflare dashboard > Workers & Pages > the project name).
+  "name": "class-routine",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "404-page"
+  }
+}
